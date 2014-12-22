@@ -23,8 +23,22 @@
    [org.webjars/bootstrap "3.3.0"]
    [org.webjars/jquery "2.1.0"]
    [prismatic/plumbing "0.2.2"]
-   [prismatic/schema "0.2.1"]
+   [prismatic/schema "0.3.3"]
    [ch.qos.logback/logback-classic "1.0.7" :exclusions [org.slf4j/slf4j-api]]
+
+   ;;   [cylon "0.5.0-20141113.002430-27"]
+   [cheshire                "5.3.1"]
+   [clj-jwt "0.0.8"]
+   [liberator "0.11.0"  :exclusions [org.clojure/tools.logging org.clojure/tools.trace]]
+   ;; email
+   [com.draines/postal "1.11.1"]
+
+
+   [garden "1.1.5" :exclusions [org.clojure/clojure]]
+   [hiccup "1.0.5"]
+
+ ;  [cylon/bootstrap-login-form "0.1.0-SNAPSHOT"]
+
    ]
 
   :main foo.main
