@@ -50,7 +50,7 @@
   (stop [component] component)
 
   LoginFormRenderer
-  (render-login-form [component req model]
+  (render-login-form [this req model]
     (render-template templater
                      "templates/page.html.mustache"
                      {:content
@@ -59,19 +59,28 @@
                          "templates/login.html.mustache"
                          (merge template-model
                                 {:reset-password-link (path-for (:routes @router) :cylon.user.reset-password/request-reset-password-form)})
-                         (:partials component)))}))
+                         (:partials this)))}))
 
   UserFormRenderer
-  (render-signup-form [_ req model]
-    (throw (ex-info "Not implemented here (it is possible to sign up via the homepage)" model)))
+  (render-signup-form [this req model]
+    (render-template templater
+                     "templates/page.html.mustache"
+                     {:content
+                      (let [template-model (model->template-model model)]
+                        (render-resource
+                         "templates/signup.html.mustache"
+                         (merge template-model
+                                {:reset-password-link (path-for (:routes @router) :cylon.user.reset-password/request-reset-password-form)})
+                         (:partials this)))})
+)
 
   (render-welcome [_ req model]
     "Return the HTML that will be used to welcome the new user."
     (throw (ex-info "TODO" model)))
 
-  (render-welcome-email-message [_ model]
-    #_{:subject "Welcome to opensensors.io"
-     :body (format "Thanks for signing up. Please click on this link to verify your email address: %s" (:email-verification-link model))})
+  (render-welcome-email-message [this model]
+     {:subject "Welcome to opensensors.io"
+      :body (format "Thanks for signing up. Please click on this link to verify your email address: %s" (:email-verification-link model))})
 
   (render-email-verified [component req model]
     #_(render-resource

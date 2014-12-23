@@ -1,10 +1,12 @@
 (ns foo.user-store
   (:require   [com.stuartsierra.component :as component :refer (using)]
-              [cylon.user.protocols :refer (UserStore)]
+              [cylon.user.protocols :refer (UserStore get-user)]
+              [cylon.token-store.protocols :refer (TokenStore create-token! get-token-by-id renew-token! purge-token! dissoc-token! merge-token!)]
               [cylon.user.totp :as t :refer (OneTimePasswordStore set-totp-secret get-totp-secret)]
               [plumbing.core :refer (<-)]))
 
-(defrecord UserTokenStore [host port dbname user password]
+
+(defrecord MyUserStore [host port dbname user password token-store]
   component/Lifecycle
   (start [this]
     #_(assoc this
@@ -18,53 +20,44 @@
   (stop [this] this)
 
   UserStore
-  (create-user! [component uid {:keys [hash salt]} email user-details]
+  (create-user! [this uid {:keys [hash salt]} email user-details]
+    (create-token! token-store uid {:id uid
+                                    :name (:name user-details)
+                                    :email email
+                                    :password_hash hash
+                                    :password_salt salt
+                                    :role "user"}))
 
-    #_(j/insert!
-     (:connection component)
-     :users {:id uid
-             :name (:name user-details)
-             :email email
-             :password_hash hash
-             :password_salt salt
-             :role "user"}))
-
-  (get-user [component uid]
-    #_(when-let [row (first (j/query (:connection component)
-                                   ["SELECT * FROM users WHERE id = ?" uid]))]
+  (get-user [this uid]
+    (when-let [row (-> token-store :tokens deref (get uid))]
       {:uid (:id row)
        :name (:name row)
        :email (:email row)}))
 
-  (get-user-password-hash [component uid]
-    #_(when-let [row (first (j/query (:connection component)
-                                   ["SELECT * FROM users WHERE id = ?" uid]))]
+  (get-user-password-hash [this uid]
+    (when-let [row (get-user this uid)]
       {:hash (:password_hash row)
        :salt (:password_salt row)}))
 
-  (set-user-password-hash! [component uid {:keys [hash salt]}]
-    #_(j/update!
-     (:connection component)
-     :users {:password_hash hash
-             :password_salt salt}
-     ["id = ?" uid]))
+  (set-user-password-hash! [this uid {:keys [hash salt]}]
+    (merge-token! token-store uid
+                  {:hash (:password_hash hash)
+                   :salt (:password_salt salt)}))
 
-  (get-user-by-email [component email]
-    #_(when-let [row (first (j/query (:connection component)
-                                   ["SELECT * FROM users WHERE email = ?" email]))]
+  (get-user-by-email [this email]
+
+    (when-let [row (->>
+      (-> token-store :tokens deref vals)
+      (filter #(= email (:email %))))]
       {:uid (:id row)
        :name (:name row)
        :email (:email row)}))
 
-  (delete-user! [component uid]
-    #_(j/delete!
-     (:connection component)
-     :users ["id = ?" uid]))
+  (delete-user! [this uid]
+    (purge-token! token-store uid))
 
-  (verify-email! [component uid]
-    #_(j/update!
-     (:connection component)
-     :users {:email_verified true} ["id = ?" uid]))
+  (verify-email! [this uid]
+    (merge-token! token-store uid {:email_verified true}))
 
 
   OneTimePasswordStore
@@ -80,5 +73,5 @@
 (defn new-user-store
   [& {:as opts}]
   (->> opts
-       map->UserTokenStore
-       (<- (using [:user-token-store]))))
+       map->MyUserStore
+       (<- (using [:token-store]))))

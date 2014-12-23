@@ -1,0 +1,40 @@
+<div class="wrapper wrapper-hero wrapper-hero-login">
+
+  <canvas id="demo-canvas"></canvas>
+
+  <div class="container">
+
+    {{#login-failed?}}
+    <div class="alert alert-danger" role="alert">
+      <button type="button" class="close" data-dismiss="alert">
+        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+      <strong>Incorrect login credentials!</strong>
+    </div>
+    {{/login-failed?}}
+
+    <div class="row">
+      <div class="col-md-12 center-block">
+    	<h1 class="logo-text">Demo cylon Oauth2</h1>
+
+
+    	<form role="form" method="{{form.method}}" action="{{form.action}}">
+    	  <div class="form-group">
+
+            {{#form.fields}}
+    	    <!-- <label for="userEmail">User ID</label> -->
+    	    <input name="{{name}}" type="{{type}}" class="form-control" placeholder="{{placeholder}}" value="{{value}}">
+
+            {{/form.fields}}
+    	  </div>
+    	  <button type="submit" class="btn btn-primary center-block">Login</button>
+
+          <div>
+          <p>&nbsp;</p>
+            <p class="note" style="color:white;">Have you forgotten your password? <b> <a class="btn btn-default" href="{{reset-password-link}}">Reset Password</a></b></p>
+          </div>
+    	</form>
+
+      </div>
+    </div>
+  </div>
+</div>

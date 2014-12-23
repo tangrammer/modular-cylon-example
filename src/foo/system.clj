@@ -129,7 +129,8 @@
     :user-token-store
     (new-atom-backed-token-store
      :ttl-in-secs nil)
-    :user-store (new-user-store)
+    :user-store (-> (new-user-store)
+                    (using {:token-store :user-token-store} ))
 
     ))
 
@@ -200,7 +201,8 @@
                 ;; TODO: Use a store that has a reset policy of a few hours
                 :verification-code-store :verification-code-store
                 :password-verifier :password-verifier
-                :emailer :emailer}))
+                :emailer :emailer})
+        (co-using {:router :authorization-server-webrouter}))
 
     ;; When OAuth clients contact the authorization server, it looks them up
     ;; in its registry. Since registration of all clients is part of
@@ -256,29 +258,21 @@
       (raise-event! [_ ev] (warnf "User created!" ev)))
 
     :signup-form
-    (-> (new-signup-with-totp :uri-context "/auth")
+    (-> (new-signup-with-totp :uri-context "/auth" :post-signup-redirect (str (get-in config [:webapp :location]) "/index.html"))
         (using {:user-store :user-store
                 :password-verifier :password-verifier
                 :session-store :authorization-server-session-store
                 :renderer :user-form-renderer
                 :verification-code-store :verification-code-store
                 :emailer :emailer
-                :events :signup-event-hook}))
-
-    ;; Web resources include static HTML, CSS, JavaScript, etc.
-    #_:web-resources
-    #_(new-web-service
-     :request-handlers {}
-     :routes ["/" [[""
-                    (->ResourcesMaybe {:prefix "public/"})]
-                   ["js/" (->ResourcesMaybe {:prefix "react/"})]]]
-     :uri-context "")
+                :events :signup-event-hook})
+        (co-using {:router :authorization-server-webrouter}))
 
     ;; A bidi-compatible router brings together components that provide
     ;; web services.
     :authorization-server-webrouter
     (-> (new-router)
-        (using [:authorization-server :login :reset-password :logout :signup-form #_:web-resources :jquery-resources :public-resources-public-resources :twitter-bootstrap-service]))
+        (using [:authorization-server :login :reset-password :logout :signup-form :jquery-resources :public-resources-public-resources :twitter-bootstrap-service]))
 
     ;; Finally, the router is made accessible over HTTP, using an
     ;; http-kit listener. The authorization server is now fully defined
