@@ -14,7 +14,7 @@
                 {:from from
                  :to "juanantonioruz@gmail.com"
                  :subject "Hello Mailer"
-                 :body (str "my body!")})))
+                 :body (:body data)})))
 
 (defn new-emailer
   [& {:as opts}]

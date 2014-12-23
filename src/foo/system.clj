@@ -352,6 +352,74 @@
 
     ))
 
+#_(defn add-resource-server
+  "Add a resource server to test oauth with api calls (Liberator resources)."
+  [system config]
+  (assoc system
+
+    ;; We have already defined an oauth-access-token-store which the
+    ;; authorization server uses to store the access tokens it has
+    ;; issued. We need this token store to correlate incoming requests
+    ;; bearing access tokens with the authorization rights (scopes) that
+    ;; have been granted. Such requests will have an Authorization
+    ;; header using the Bearer token method of authorization (see
+    ;; RFC-6749).
+    :oauth-access-token-request-authenticator
+    (-> (new-access-token-request-authenticator)
+        (using {:access-token-store :oauth-access-token-store}))
+
+
+
+    ;; This dispatching authenticator dispatches based on the
+    ;; Authorization header in the request. Since we have multiple ways
+    ;; of authorizing access to resources, this component dispatches to
+    ;; the correct authenticator. (Note: we could easily add support for
+    ;; other authorization methods, such as Basic and Digest
+    ;; authorization).
+
+    :api-request-via-query-parameter-authenticator
+    (using (new-api-key-via-query-parameter-request-authenticator)
+           {:database :database})
+
+    :api-request-via-auth-header-authenticator
+    (new-authorization-header-request-authenticator
+     :mappings {"Bearer" :oauth-access-token-request-authenticator
+                "api-key" :api-key-via-auth-header-request-authenticator})
+
+    :api-request-authenticator
+    (using (new-either-request-authenticator)
+           [:api-request-via-query-parameter-authenticator
+            :api-request-via-auth-header-authenticator])
+
+    ;; The API is set of Liberator resources. The password verifier is
+    ;; only used by the API to hash passwords for new users that are
+    ;; created via the API. It does not use the password verifier for
+    ;; authentication.
+    :api
+    (-> (new-api :uri-context "/api/1.0")
+        (using {:database :database
+                :password-verifier :password-verifier
+                :messages-store :cassandra
+                :authenticator :api-request-authenticator
+                :emailer :emailer}))
+
+    ;; We combine these resources into a bidi-compatible router.
+    :resource-router
+    (-> (new-router)
+        (using [:api]))
+
+    :resource-ring-middleware
+    (-> (new-ring-middleware)
+        (using {:original-request-handler :resource-router}))
+
+    ;; Finally, the router is made accessible over HTTP, using an
+    ;; http-kit listener. The resource server is now fully defined
+    ;; and ready to start.
+    :resource-listener (-> (new-http-listener
+                            :port (get-in config [:resource-server :port]))
+                           (using {:request-handler :resource-ring-middleware}))))
+
+
 (defn new-system-map
   [config]
   (apply system-map
