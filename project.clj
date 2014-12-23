@@ -1,5 +1,5 @@
-(defproject foo "0.1.0-SNAPSHOT"
-  :description "A modular project created with lein new modular bootstrap-cover"
+(defproject cylon-oauth2-demo "0.1.0-SNAPSHOT"
+  :description "A modular project using juxt/cylon oauth2"
   :url "http://github.com/tangrammer/foo"
 
   :exclusions [com.stuartsierra/component]
@@ -10,9 +10,13 @@
    [com.stuartsierra/component "0.2.2"]
    [juxt.modular/bidi "0.6.1"]
    [juxt.modular/clostache "0.6.0"]
+
+   [juxt.modular/bootstrap "0.2.0" :exclusions [cylon]]
+
    [juxt.modular/http-kit "0.5.3"]
    [juxt.modular/maker "0.5.0"]
    [juxt.modular/wire-up "0.5.0"]
+
    [malcolmsparks/co-dependency "0.1.5"]
    [org.clojure/clojure "1.7.0-alpha4"]
    [org.clojure/tools.logging "0.2.6"]
@@ -34,7 +38,7 @@
    [com.draines/postal "1.11.1"]
 
 
-   [garden "1.1.5" :exclusions [org.clojure/clojure]]
+   [garden "1.1.5" :exclusions [org.clojure/clojure org.clojure/clojurescript]]
    [hiccup "1.0.5"]
 
  ;  [cylon/bootstrap-login-form "0.1.0-SNAPSHOT"]

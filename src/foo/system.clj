@@ -21,12 +21,14 @@
    [cylon.user.login :refer (new-login)]
    [cylon.oauth.server.logout :refer (new-logout)]
    [cylon.user.reset-password :refer (new-reset-password)]
-   [cylon.bootstrap-login-form :refer (new-bootstrap-login-form-renderer)]
+   [foo.forms :refer (new-user-form-renderer)]
    [cylon.oauth.registry.ref-backed-registry :refer (new-ref-backed-client-registry)]
    [cylon.user.signup :refer (new-signup-with-totp)]
    [cylon.event :refer (EventPublisher)]
 
    [cylon.oauth.server.server :refer (new-authorization-server)]
+
+   [cylon.oauth.client.web-client :refer (new-web-client)]
 
    [modular.bidi :refer (new-router new-static-resource-service new-web-service)]
    [modular.clostache :refer (new-clostache-templater)]
@@ -68,9 +70,9 @@
   (assoc system
     :http-listener-listener
     (->
-      (make new-webserver config)
-      (using [])
-      (co-using []))))
+     (make new-webserver config :port (get-in config [:webapp :port]))
+     (using [])
+     (co-using []))))
 
 (defn modular-bidi-router-components [system config]
   (assoc system
@@ -102,7 +104,7 @@
     :bootstrap-cover-website-website
     (->
       (make new-website config)
-      (using [])
+      (using {:oauth-client :webapp-oauth-client})
       (co-using []))))
 
 (defn twitter-bootstrap-components [system config]
@@ -174,7 +176,10 @@
 
     ;; This component provides all the Cylon callback functions for
     ;; email text and HTML responses for authorization server protocols.
-    :user-form-renderer (new-bootstrap-login-form-renderer)
+    :user-form-renderer (-> (new-user-form-renderer)
+                            (using {:templater :clostache-templater-templater})
+                            (co-using {:router :authorization-server-webrouter}))
+
 
     ;; A login form, which manages the authentication 'interaction' with
     ;; a user, providing the outcome to other interested components.
@@ -273,7 +278,7 @@
     ;; web services.
     :authorization-server-webrouter
     (-> (new-router)
-        (using [:authorization-server :login :reset-password :logout :signup-form #_:web-resources]))
+        (using [:authorization-server :login :reset-password :logout :signup-form #_:web-resources :jquery-resources :public-resources-public-resources :twitter-bootstrap-service]))
 
     ;; Finally, the router is made accessible over HTTP, using an
     ;; http-kit listener. The authorization server is now fully defined
@@ -281,6 +286,77 @@
     :authorization-server-http-listener
     (-> (new-webserver :port (get-in config [:auth-server :port]) )
         (using {:request-handler :authorization-server-webrouter}))))
+
+
+(defn add-oauth-client
+  "Add a web application.
+
+  Web applications are OAuth2 clients."
+  [system config]
+  (assoc system
+    ;; TODO: Why doesn't web app need :web-resources? Is it duplicating
+    ;; these routes?
+
+    ;; The webapp establishes long running sessions with its users,
+    ;; represented by durable tokens stored in PostgreSQL.
+    :webapp-token-store (new-atom-backed-token-store)
+
+    :webapp-session-store
+    (-> (new-cookie-session-store :cookie-id "webapp-session-id")
+        (using {:token-store :webapp-token-store}))
+
+    ;; Clients generate state tokens to ensure the authenticity of the
+    ;; authorization server that contact it.
+    ;; We'll give 60 minutes to login, the reason for this is in case
+    ;; the user has problems and needs to do a password reset.
+    :state-store
+    (new-atom-backed-token-store :ttl-in-secs (* 60 60))
+
+    ;; The webapp defines the configuration of an OAuth2 client, which
+    ;; it can then use to determine a user's identity and authorization
+    ;; rights.
+    ;;
+    :webapp-oauth-client
+    (-> (new-web-client
+         :application-name "Demo Cylon OAuth"
+         :homepage-uri "https://demo-cylon-oauth.com"
+
+         :uri-context ""
+         :redirection-uri (str (get-in config [:webapp :location]) "/grant")
+         :post-logout-redirect-uri (str (get-in config [:webapp :location]) "/")
+
+         :required-scopes #{:user
+                            :user/write-devices
+                            :user/write-topics
+                            :user/create-private-topics
+                            :superuser/read-users
+                            :superuser/create-topics}
+
+         ;; Perhaps we could get these during dynamic registration with
+         ;; the client-registry?
+         :authorize-uri
+         (str (get-in config [:auth-server :location]) "/auth/authorize")
+
+         :access-token-uri
+         (str (or (get-in config [:auth-server :local-location])
+                  (get-in config [:auth-server :location])) "/auth/access-token")
+
+         :end-session-endpoint
+         (str (get-in config [:auth-server :location]) "/auth/logout")
+
+         ;; Specify this client is special doesn't require the user to
+         ;; authorize the application. This should only be false for
+         ;; standard applications, and always set to true
+         ;; for third-party ones.
+         :requires-user-acceptance? false)
+
+        (using
+         { ;; Clients auto-register if :client-registry is specified.
+          :client-registry :oauth-client-registry
+          :state-store :state-store
+          :session-store :webapp-session-store}))
+
+    ))
 
 (defn new-system-map
   [config]
@@ -290,6 +366,7 @@
           (add-user-store config)
           (add-emailer config)
           (add-authorization-server config)
+          (add-oauth-client config)
           (http-listener-components config)
           (modular-bidi-router-components config)
           (clostache-templater-components config)
@@ -304,7 +381,9 @@
    :modular-bidi-router-webrouter {:public-resources :public-resources-public-resources,
                                    :website :bootstrap-cover-website-website,
                                    :twitter-bootstrap :twitter-bootstrap-service,
-                                   :jquery :jquery-resources},
+                                   :jquery :jquery-resources
+                                   :oauth-client :webapp-oauth-client
+                                   },
    :bootstrap-cover-website-website {:templater :clostache-templater-templater}})
 
 (defn new-co-dependency-map

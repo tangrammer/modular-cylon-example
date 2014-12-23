@@ -10,7 +10,9 @@
    [modular.ring :refer (WebRequestHandler)]
    [modular.template :refer (render-template template-model)]
    [ring.util.response :refer (response)]
-   [tangrammer.component.co-dependency :refer (co-using)]))
+   [tangrammer.component.co-dependency :refer (co-using)]
+   [cylon.oauth.client :refer (wrap-require-authorization)]
+))
 
 (defn menu [router uri]
   (hiccup/html
@@ -53,21 +55,23 @@
             from modular's bootstrap-cover template. This text can be
             found in " [:code "foo/website.clj"]] ]))))
 
-(defn features [templater router]
-  (fn [req]
-    (page templater router req
-          (hiccup/html
-           [:div
-            [:h1.cover-heading "Features"]
-            [:p.lead "bootstrap-cover exhibits the following :-"]
-            [:ul.lead
-             [:li "A working Clojure-powered website using Stuart Sierra's 'reloaded' workflow and component library"]
-             [:li "A fully-commented route-contributing website component"]
-             [:li [:a {:href "https://github.com/juxt/bidi"} "Bidi"] " routing"]
-             [:li "Co-dependencies"]
-             [:li "Deployable with lein run"]
-             ]
-            [:p "This list can be found in " [:code "foo/website.clj"]]]))))
+(defn features [oauth-client templater router]
+  (-> (fn [req]
+     (page templater router req
+           (hiccup/html
+            [:div
+             [:h1.cover-heading "Features"]
+             [:p.lead "bootstrap-cover exhibits the following :-"]
+             [:ul.lead
+              [:li "A working Clojure-powered website using Stuart Sierra's 'reloaded' workflow and component library"]
+              [:li "A fully-commented route-contributing website component"]
+              [:li [:a {:href "https://github.com/juxt/bidi"} "Bidi"] " routing"]
+              [:li "Co-dependencies"]
+              [:li "Deployable with lein run"]
+              ]
+             [:p "This list can be found in " [:code "foo/website.clj"]]])))
+      (wrap-require-authorization oauth-client :user)
+      ))
 
 (defn about [templater router]
   (fn [req]
@@ -83,7 +87,7 @@
 
 ;; Components are defined using defrecord.
 
-(defrecord Website [templater router]
+(defrecord Website [oauth-client templater router]
 
   ; modular.bidi provides a router which dispatches to routes provided
   ; by components that satisfy its WebService protocol
@@ -92,7 +96,7 @@
     ;; Return a map between some keywords and their associated Ring
     ;; handlers
     {::index (index templater router)
-     ::features (features templater router)
+     ::features (features oauth-client templater router)
      ::about (about templater router)})
 
   ;; Return a bidi route structure, mapping routes to keywords defined
@@ -113,5 +117,5 @@
 
 (defn new-website []
   (-> (map->Website {})
-      (using [:templater])
+      (using [:templater :oauth-client])
       (co-using [:router])))
