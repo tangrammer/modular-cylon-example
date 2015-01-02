@@ -79,14 +79,17 @@
     (throw (ex-info "TODO" model)))
 
   (render-welcome-email-message [this model]
-     {:subject "Welcome to opensensors.io"
+     {:subject "Modular Oauth. Verify your mail account"
       :body (format "Thanks for signing up. Please click on this link to verify your email address: %s" (:email-verification-link model))})
 
-  (render-email-verified [component req model]
-    #_(render-resource
-     "templates/email-verified.html.mustache"
-     (model->template-model model)
-     (:partials component)))
+  (render-email-verified [this req model]
+    (render-template templater
+                     "templates/page.html.mustache"
+                     {:content
+                      (render-resource
+                       "templates/email-verified.html.mustache"
+                       (model->template-model model)
+                       (:partials this))}))
 
   (render-reset-password-request-form [component req model]
     #_(render-resource
