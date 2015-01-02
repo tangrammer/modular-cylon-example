@@ -13,7 +13,7 @@
     (send-message settings
                 {:from from
                  :to "juanantonioruz@gmail.com"
-                 :subject "Hello Mailer"
+                 :subject (:subject data)
                  :body (:body data)})))
 
 (defn new-emailer
