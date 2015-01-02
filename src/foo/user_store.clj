@@ -7,18 +7,6 @@
 
 
 (defrecord MyUserStore [host port dbname user password token-store]
-  component/Lifecycle
-  (start [this]
-    #_(assoc this
-      :connection
-      {:subprotocol "postgresql"
-       :classname "org.postgresql.Driver"
-       :subname (format "//%s:%d/%s" host port dbname)
-       :user user
-       :password password})
-    this)
-  (stop [this] this)
-
   UserStore
   (create-user! [this uid {:keys [hash salt]} email user-details]
     (create-token! token-store uid {:id uid
@@ -35,7 +23,8 @@
        :email (:email row)}))
 
   (get-user-password-hash [this uid]
-    (when-let [row (get-user this uid)]
+    (when-let [row (-> token-store :tokens deref (get uid))]
+      (println row)
       {:hash (:password_hash row)
        :salt (:password_salt row)}))
 
@@ -48,7 +37,8 @@
 
     (when-let [row (->>
       (-> token-store :tokens deref vals)
-      (filter #(= email (:email %))))]
+      (filter #(= email (:email %)))
+      (first))]
       {:uid (:id row)
        :name (:name row)
        :email (:email row)}))

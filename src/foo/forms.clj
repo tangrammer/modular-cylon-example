@@ -35,20 +35,6 @@
   (postwalk stringify-map-values model))
 
 (defrecord MyUserFormRenderer [templater router]
-  Lifecycle
-  (start [component]
-    #_(assoc component
-      ;; We are slurping in the template snippets here, for performance
-      ;; reasons, so that they are not slurped in on every request. We
-      ;; will get these results each time via (:partials
-      ;; component). This is the only reason we are satisfying the
-      ;; Lifecycle protocol.
-      :partials {:header (slurp (resource "templates/header.html.mustache"))
-                 :footer (slurp (resource "templates/footer.html.mustache"))})
-    component
-    )
-  (stop [component] component)
-
   LoginFormRenderer
   (render-login-form [this req model]
     (render-template templater
@@ -91,45 +77,60 @@
                        (model->template-model model)
                        (:partials this))}))
 
-  (render-reset-password-request-form [component req model]
-    #_(render-resource
-     "templates/reset-password-request.html.mustache"
-     (model->template-model model)
-     (:partials component)))
+  (render-reset-password-request-form [this req model]
+    (render-template templater
+                     "templates/page.html.mustache"
+                     {:content
+                      (render-resource
+                       "templates/reset-password-request.html.mustache"
+                       (model->template-model model)
+                       (:partials this))}))
 
   (render-reset-password-email-message [_ model]
-    #_{:subject "Reset password confirmation step"
+    {:subject "Reset password confirmation step"
      :body (format "Please click on this link to reset your password account: %s" (:link model))})
 
-  (render-reset-password-link-sent-response [component req model]
-    #_(render-resource
-     "templates/reset-password-link-sent.html.mustache"
-     (model->template-model model)
-     (:partials component)))
+  (render-reset-password-link-sent-response [this req model]
+    (render-template templater
+                     "templates/page.html.mustache"
+                     {:content
+                      (render-resource
+                       "templates/reset-password-link-sent.html.mustache"
+                       (model->template-model model)
+                       (:partials this))}))
 
-  (render-password-reset-form [component req model]
-    #_(render-resource
-     "templates/reset-password.html.mustache"
-     (model->template-model model)
-     (:partials component)))
+  (render-password-reset-form [this req model]
+    (render-template templater
+                     "templates/page.html.mustache"
+                     {:content
+                      (render-resource
+                       "templates/reset-password.html.mustache"
+                       (model->template-model model)
+                       (:partials this))}))
 
-  (render-password-changed-response [component req model]
-    #_(render-resource
-     "templates/password-changed.html.mustache"
-     (model->template-model model)
-     (:partials component)))
+  (render-password-changed-response [this req model]
+        (render-template templater
+                     "templates/page.html.mustache"
+                     {:content
+                      (render-resource
+                       "templates/password-changed.html.mustache"
+                       (model->template-model model)
+                       (:partials this))}))
 
   ErrorRenderer
-  (render-error-response [component req model]
-    #_(render-resource
-     "templates/error-page.html.mustache"
-     (merge (model->template-model model)
+  (render-error-response [this req model]
+    (render-template templater
+                     "templates/page.html.mustache"
+                     {:content
+                      (render-resource
+                       "templates/error-page.html.mustache"
+                       (merge (model->template-model model)
             {:message
              (case (:error-type model)
                :user-already-exists (format "User '%s' already exists" (:user-id model))
                "Unknown error")})
-
-     (:partials component))))
+                       (:partials this))})
+))
 
 (defn new-user-form-renderer [& {:as opts}]
   (->> opts

@@ -39,13 +39,13 @@
     templater
     "templates/page.html.mustache" ; our Mustache template
     {:menu (menu router  (:uri req)
-                        [[:li
-                          [:a (merge {:href (format "%s://%s:%s%s"
-                                                    (name (:scheme req))
-                                                    (:server-name req)
-                                                    (:port @oauth-listener)
-                                                    (path-for (:routes @oauth-router) :cylon.user.signup/GET-signup-form))})
-                           "Sign up"]]])
+                 [[:li
+                   [:a (merge {:href (format "%s://%s:%s%s"
+                                             (name (:scheme req))
+                                             (:server-name req)
+                                             (:port @oauth-listener)
+                                             (path-for (:routes @oauth-router) :cylon.user.signup/GET-signup-form))})
+                    "Sign up"]]])
      :content content})))
 
 (defn index [templater router oauth-router oauth-listener]

@@ -54,10 +54,12 @@
   (start)
   :ok
   )
-
+(declare insert-user)
 (defn reset []
   (stop)
-  (refresh :after 'dev/go))
+  (refresh :after 'dev/go)
+
+  )
 
 ;; REPL Convenience helpers
 
@@ -67,3 +69,13 @@
 (defn path->route [path]
   (match-route (routes) path))
 
+(defn insert-user [uid pass name email]
+  (let [pw-hash (cylon.password/make-password-hash (-> system :password-verifier) pass)]
+    (cylon.user/create-user! (-> system :user-store) uid pw-hash email {:name name})
+
+    ))
+
+(comment
+  ;; insert test user
+(insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com")
+  )
