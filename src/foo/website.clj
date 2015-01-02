@@ -14,36 +14,43 @@
    [cylon.oauth.client :refer (wrap-require-authorization)]
 ))
 
-(defn menu [router uri]
+(defn menu [router uri signup-item]
   (hiccup/html
    [:ul.nav.masthead-nav
-    (for [[k label] [[::index "Home"]
-                     [::features "Features"]
-                     [::about "About"]]
-          ;; This demonstrates the generation of hyperlinks from
-          ;; keywords.
+    (concat (for [[k label] [[::index "Home"]
+                      [::features "Features"]
+                      [::about "About"]]
+           ;; This demonstrates the generation of hyperlinks from
+           ;; keywords.
 
-          ;; by the way, router is deref'd because it's a
-          ;; co-dependency, this is likely to change to potemkin's
-          ;; def-map-type in future releases, so a deref will be
-          ;; unnecessary (and deprecated)
+           ;; by the way, router is deref'd because it's a
+           ;; co-dependency, this is likely to change to potemkin's
+           ;; def-map-type in future releases, so a deref will be
+           ;; unnecessary (and deprecated)
 
-          :let [href (path-for (:routes @router) k)]]
-      [:li (when (= href uri) {:class "active"})
-       [:a (merge {:href href}) label]]
-      )]))
+           :let [href (path-for (:routes @router) k)]]
+       [:li (when (= href uri) {:class "active"})
+        [:a (merge {:href href}) label]]
+       ) signup-item)]))
 
-(defn page [templater router req content]
+(defn page [templater router oauth-router oauth-listener req content]
   (response
    (render-template
     templater
     "templates/page.html.mustache" ; our Mustache template
-    {:menu (menu router (:uri req))
+    {:menu (menu router  (:uri req)
+                        [[:li
+                          [:a (merge {:href (format "%s://%s:%s%s"
+                                                    (name (:scheme req))
+                                                    (:server-name req)
+                                                    (:port @oauth-listener)
+                                                    (path-for (:routes @oauth-router) :cylon.user.signup/GET-signup-form))})
+                           "Sign up"]]])
      :content content})))
 
-(defn index [templater router]
+(defn index [templater router oauth-router oauth-listener]
   (fn [req]
-    (page templater router req
+    (page templater router oauth-router oauth-listener req
           (hiccup/html
            [:div
             [:h1.cover-heading "Welcome"]
@@ -55,9 +62,9 @@
             from modular's bootstrap-cover template. This text can be
             found in " [:code "foo/website.clj"]] ]))))
 
-(defn features [oauth-client templater router]
+(defn features [oauth-client templater router oauth-router oauth-listener]
   (-> (fn [req]
-     (page templater router req
+     (page templater router oauth-router oauth-listener req
            (hiccup/html
             [:div
              [:h1.cover-heading "Features"]
@@ -73,9 +80,9 @@
       (wrap-require-authorization oauth-client :user)
       ))
 
-(defn about [templater router]
+(defn about [templater router oauth-router oauth-listener]
   (fn [req]
-    (page templater router req
+    (page templater router oauth-router oauth-listener req
           (hiccup/html
            [:div
             [:h1.cover-heading "About"]
@@ -87,7 +94,7 @@
 
 ;; Components are defined using defrecord.
 
-(defrecord Website [oauth-client templater router]
+(defrecord Website [oauth-client templater router oauth-router oauth-listener]
 
   ; modular.bidi provides a router which dispatches to routes provided
   ; by components that satisfy its WebService protocol
@@ -95,9 +102,9 @@
   (request-handlers [this]
     ;; Return a map between some keywords and their associated Ring
     ;; handlers
-    {::index (index templater router)
-     ::features (features oauth-client templater router)
-     ::about (about templater router)})
+    {::index (index templater router oauth-router oauth-listener)
+     ::features (features oauth-client templater router oauth-router oauth-listener)
+     ::about (about templater router oauth-router oauth-listener)})
 
   ;; Return a bidi route structure, mapping routes to keywords defined
   ;; above. This additional level of indirection means we can generate
@@ -118,4 +125,4 @@
 (defn new-website []
   (-> (map->Website {})
       (using [:templater :oauth-client])
-      (co-using [:router])))
+      (co-using [:router :oauth-router :oauth-listener])))

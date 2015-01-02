@@ -82,7 +82,6 @@
       (using [])
       (co-using []))))
 
-
 (defn clostache-templater-components [system config]
   (assoc system
     :clostache-templater-templater
@@ -251,12 +250,6 @@
      :ttl-in-secs (* 60 60 24 90)       ; 90 days
      )
 
-    ;; The sign-up form, like the login-form, takes a renderer and has
-    ;; dependencies on many of the components already defined.
-    :signup-event-hook
-    (reify EventPublisher
-      (raise-event! [_ ev] (warnf "User created!" ev)))
-
     :signup-form
     (-> (new-signup-with-totp :uri-context "/auth" :post-signup-redirect (str (get-in config [:webapp :location]) "/index.html"))
         (using {:user-store :user-store
@@ -264,8 +257,7 @@
                 :session-store :authorization-server-session-store
                 :renderer :user-form-renderer
                 :verification-code-store :verification-code-store
-                :emailer :emailer
-                :events :signup-event-hook})
+                :emailer :emailer})
         (co-using {:router :authorization-server-webrouter}))
 
     ;; A bidi-compatible router brings together components that provide
@@ -280,7 +272,6 @@
     :authorization-server-http-listener
     (-> (new-webserver :port (get-in config [:auth-server :port]) )
         (using {:request-handler :authorization-server-webrouter}))))
-
 
 (defn add-oauth-client
   "Add a web application.
@@ -450,7 +441,9 @@
 
 (defn new-co-dependency-map
   []
-  {:bootstrap-cover-website-website {:router :modular-bidi-router-webrouter}})
+  {:bootstrap-cover-website-website {:router :modular-bidi-router-webrouter
+                                     :oauth-router :authorization-server-webrouter
+                                     :oauth-listener :authorization-server-http-listener}})
 
 (defn new-production-system
   "Create the production system"
