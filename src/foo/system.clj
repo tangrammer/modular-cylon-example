@@ -102,7 +102,9 @@
   (assoc system
     :bootstrap-cover-website-website
     (->
-      (make new-website config)
+     (make new-website config :logout-uri (str (get-in config [:auth-server :location]) "/auth/logout")
+           :signup-uri (str (get-in config [:auth-server :location]) "/auth/signup")
+           )
       (using {:oauth-client :webapp-oauth-client})
       (co-using []))))
 
@@ -323,8 +325,7 @@
          (str (get-in config [:auth-server :location]) "/auth/authorize")
 
          :access-token-uri
-         (str (or (get-in config [:auth-server :local-location])
-                  (get-in config [:auth-server :location])) "/auth/access-token")
+         (str (get-in config [:auth-server :location]) "/auth/access-token")
 
          :end-session-endpoint
          (str (get-in config [:auth-server :location]) "/auth/logout")
@@ -441,9 +442,7 @@
 
 (defn new-co-dependency-map
   []
-  {:bootstrap-cover-website-website {:router :modular-bidi-router-webrouter
-                                     :oauth-router :authorization-server-webrouter
-                                     :oauth-listener :authorization-server-http-listener}})
+  {:bootstrap-cover-website-website {:router :modular-bidi-router-webrouter}})
 
 (defn new-production-system
   "Create the production system"
