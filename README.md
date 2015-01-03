@@ -21,6 +21,9 @@ user> (dev)
 dev> (go)
 ```
 
+**Visit your app**   
+[http://localhost:8010](http://localhost:8010)
+
 After making code changes, reset your application's state (causing all
 your modifications to be reloaded too).
 
@@ -34,8 +37,9 @@ To add a test user `[:uid "tangrammer" :password "clojure"]` each time you reset
 dev> (reset+data)
 ```
 
-
 Rinse and repeat.
+
+
 
 ## Copyright and License
 
