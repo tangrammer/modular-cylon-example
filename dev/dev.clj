@@ -75,7 +75,7 @@
 
     ))
 
-(comment
+(defn reset-app []
   ;; reset && insert test user
   (do
     (reset)

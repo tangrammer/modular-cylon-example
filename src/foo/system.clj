@@ -54,9 +54,10 @@
 
 (defn ^:private config-from-classpath
   []
-  (if-let [res (io/resource ".modular.edn")]
+  (if-let [res (io/resource "modular.edn")]
     (config-from (io/file res))
     {}))
+
 
 (defn config
   "Return a map of the static configuration used in the component

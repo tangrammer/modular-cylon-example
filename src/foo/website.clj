@@ -97,7 +97,6 @@
                ]
               [:p "This list can be found in " [:code "foo/website.clj"]]])))))
 
-
 (defn protected [templater router oauth-client signup-uri]
   (-> (fn [req]
         (let [menu (menu-extended router req oauth-client signup-uri)]
@@ -112,7 +111,7 @@
                [:li "your personal info ..."]]]))))
       (wrap-require-authorization oauth-client :user)))
 
-(defn about [templater router oauth-client  signup-uri]
+(defn about [templater router oauth-client signup-uri]
   (fn [req]
     (let [menu (menu-extended router req oauth-client  signup-uri)]
       (page templater menu
@@ -127,7 +126,7 @@
 
 ;; Components are defined using defrecord.
 
-(defrecord Website [oauth-client templater router  signup-uri]
+(defrecord Website [oauth-client templater router signup-uri]
 
   ; modular.bidi provides a router which dispatches to routes provided
   ; by components that satisfy its WebService protocol

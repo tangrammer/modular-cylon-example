@@ -1,0 +1,8 @@
+{:webapp {:location "http://localhost:8010"
+          :port 8010}
+
+ :auth-server {:location "http://localhost:8020"
+               :port 8020}
+
+ :resource-server {:location "http://localhost:8030"
+                   :port 8030}}
