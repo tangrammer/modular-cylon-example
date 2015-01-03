@@ -1,4 +1,4 @@
-(ns foo.emailer
+(ns modular.cylon-oauth-example.emailer
   (:require
    [postal.core :refer (send-message)]
    [com.stuartsierra.component :as component]
@@ -12,7 +12,7 @@
   (send-email! [component data]
     (send-message settings
                 {:from from
-                 :to "juanantonioruz@gmail.com"
+                 :to (:to data)
                  :subject (:subject data)
                  :body (:body data)})))
 

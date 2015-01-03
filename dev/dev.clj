@@ -7,7 +7,7 @@
    [clojure.java.io :as io]
    [com.stuartsierra.component :as component]
    [tangrammer.component.co-dependency :as co-dependency]
-   [foo.system :refer (config new-system-map new-dependency-map new-co-dependency-map)]
+   [modular.cylon-oauth-example.system :refer (config new-system-map new-dependency-map new-co-dependency-map)]
    [modular.maker :refer (make)]
    [bidi.bidi :refer (match-route path-for)]
    [modular.wire-up :refer (normalize-dependency-map)]))

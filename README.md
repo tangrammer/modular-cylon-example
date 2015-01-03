@@ -1,6 +1,6 @@
-# foo
+# modular cylon (OAuth2) example
 
-A Clojure application for ...
+This is a [juxt/modular](https://github.com/juxt/modular) and [juxt/cylon](https://github.com/juxt/cylon) (Oauth2) example integration
 
 ## Usage
 
@@ -28,13 +28,20 @@ your modifications to be reloaded too).
 dev> (reset)
 ```
 
+To add a test user (uid: tangrammer pw: clojure) each time you reset your app
+
+```
+dev> (reset-app)
+```
+
+
 Rinse and repeat.
 
 ## Copyright and License
 
 The MIT License (MIT)
 
-Copyright © 2014 
+Copyright © 2014 Juan Antonio Ruz (juxt.pro)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

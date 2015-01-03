@@ -1,6 +1,6 @@
 (defproject cylon-oauth2-demo "0.1.0-SNAPSHOT"
   :description "A modular project using juxt/cylon oauth2"
-  :url "http://github.com/tangrammer/foo"
+  :url "http://github.com/tangrammer/modular-cylon-example"
 
   :exclusions [com.stuartsierra/component]
 
@@ -40,18 +40,12 @@
 
    [garden "1.1.5" :exclusions [org.clojure/clojure org.clojure/clojurescript]]
    [hiccup "1.0.5"]
-
- ;  [cylon/bootstrap-login-form "0.1.0-SNAPSHOT"]
-
    ]
 
-  :main foo.main
+  :main modular.cylon-oauth-example.main
 
   :repl-options {:init-ns user
                  :welcome (println "Type (dev) to start")}
 
-  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]
-
-                                  ]
-                   :source-paths ["dev"
-                                  ]}})
+  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]]
+                   :source-paths ["dev"]}})

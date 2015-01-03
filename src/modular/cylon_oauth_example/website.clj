@@ -1,4 +1,4 @@
-(ns foo.website
+(ns modular.cylon-oauth-example.website
   (:require
    [bidi.bidi :refer (path-for)]
    [bidi.ring :refer (redirect)]
@@ -76,9 +76,9 @@
                   building simple and beautiful home pages. Download,
                   edit the text, and add your own fullscreen background
                   photo to make it your own."]
-             [:p "This is a Clojure project called foo, generated
+             [:p "This is a Clojure project called cylon-oauth-example, generated
             from modular's bootstrap-cover template. This text can be
-            found in " [:code "foo/website.clj"]] ])))))
+            found in " [:code "modular.cylon-oauth-example/website.clj"]] ])))))
 
 (defn features [templater router oauth-client signup-uri]
   (fn [req]
@@ -95,7 +95,7 @@
                [:li "Co-dependencies"]
                [:li "Deployable with lein run"]
                ]
-              [:p "This list can be found in " [:code "foo/website.clj"]]])))))
+              [:p "This list can be found in " [:code "modular.cylon-oauth-example/website.clj"]]])))))
 
 (defn protected [templater router oauth-client signup-uri]
   (-> (fn [req]
@@ -119,7 +119,7 @@
             [:div
              [:h1.cover-heading "About"]
              [:p.lead "You should
-            edit " [:code "foo/website.clj"] ", locate
+            edit " [:code "modular.cylon-oauth-example/website.clj"] ", locate
             the " [:code "about"] " function and edit the function
             defintion to display your details here, describing who you are
             and why you started this project."]])))))

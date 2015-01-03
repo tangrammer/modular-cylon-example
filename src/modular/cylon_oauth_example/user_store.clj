@@ -1,4 +1,4 @@
-(ns foo.user-store
+(ns modular.cylon-oauth-example.user-store
   (:require   [com.stuartsierra.component :as component :refer (using)]
               [cylon.user.protocols :refer (UserStore get-user)]
               [cylon.token-store.protocols :refer (TokenStore create-token! get-token-by-id renew-token! purge-token! dissoc-token! merge-token!)]

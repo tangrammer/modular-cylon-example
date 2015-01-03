@@ -1,4 +1,4 @@
-(ns foo.forms
+(ns modular.cylon-oauth-example.forms
   (:require
    [com.stuartsierra.component :as component :refer (Lifecycle using)]
    [bidi.bidi :refer (path-for)]

@@ -1,4 +1,4 @@
-(ns foo.system
+(ns modular.cylon-oauth-example.system
   "Components and their dependency relationships"
   (:refer-clojure :exclude (read))
   (:require
@@ -9,9 +9,9 @@
    [com.stuartsierra.component :refer (system-map system-using using)]
    [tangrammer.component.co-dependency :refer (co-using system-co-using)]
    [modular.maker :refer (make)]
-   [foo.website :refer (new-website)]
-   [foo.user-store :refer (new-user-store)]
-   [foo.emailer :refer (new-emailer)]
+   [modular.cylon-oauth-example.website :refer (new-website)]
+   [modular.cylon-oauth-example.user-store :refer (new-user-store)]
+   [modular.cylon-oauth-example.emailer :refer (new-emailer)]
 
    [clojure.tools.logging :refer :all]
    [cylon.token-store.atom-backed-store :refer (new-atom-backed-token-store)]
@@ -21,7 +21,7 @@
    [cylon.user.login :refer (new-login)]
    [cylon.oauth.server.logout :refer (new-logout)]
    [cylon.user.reset-password :refer (new-reset-password)]
-   [foo.forms :refer (new-user-form-renderer)]
+   [modular.cylon-oauth-example.forms :refer (new-user-form-renderer)]
    [cylon.oauth.registry.ref-backed-registry :refer (new-ref-backed-client-registry)]
    [cylon.user.signup :refer (new-signup-with-totp)]
    [cylon.event :refer (EventPublisher)]
