@@ -27,6 +27,7 @@
    [:ul.nav.masthead-nav
     (concat (for [[k label] [[::index "Home"]
                              [::features "Features"]
+                             [::protected "Protected"]
                              [::about "About"]]
                   ;; This demonstrates the generation of hyperlinks from
                   ;; keywords.
@@ -45,7 +46,7 @@
   (menu router  (:uri req)
                  (if-not (:cylon/subject-identifier (authenticate oauth-client req))
                    [[:li
-                      [:a (merge {:href (path-for (:routes @router) ::features)})
+                      [:a (merge {:href (path-for (:routes @router) ::protected)})
                        "Log In"]]
                      [:li
                       [:a (merge {:href signup-uri})
@@ -80,9 +81,9 @@
             found in " [:code "foo/website.clj"]] ])))))
 
 (defn features [templater router oauth-client signup-uri]
-  (-> (fn [req]
-        (let [menu (menu-extended router req oauth-client signup-uri)]
-          (page templater menu
+  (fn [req]
+    (let [menu (menu-extended router req oauth-client signup-uri)]
+      (page templater menu
             (hiccup/html
              [:div
               [:h1.cover-heading "Features"]
@@ -94,7 +95,21 @@
                [:li "Co-dependencies"]
                [:li "Deployable with lein run"]
                ]
-              [:p "This list can be found in " [:code "foo/website.clj"]]]))))
+              [:p "This list can be found in " [:code "foo/website.clj"]]])))))
+
+
+(defn protected [templater router oauth-client signup-uri]
+  (-> (fn [req]
+        (let [menu (menu-extended router req oauth-client signup-uri)]
+          (page templater menu
+            (hiccup/html
+             [:div
+              [:h1.cover-heading "Protected Info"]
+              [:p.lead "This page is only available when you are logged :-"]
+              [:ul.lead
+               [:li "your personal info ..."]
+               [:li "your personal info ..."]
+               [:li "your personal info ..."]]]))))
       (wrap-require-authorization oauth-client :user)))
 
 (defn about [templater router oauth-client  signup-uri]
@@ -122,6 +137,7 @@
     ;; handlers
     {::index (index templater router oauth-client signup-uri)
      ::features (features templater router oauth-client signup-uri)
+     ::protected (protected templater router oauth-client signup-uri)
      ::about (about templater router oauth-client signup-uri)})
 
   ;; Return a bidi route structure, mapping routes to keywords defined
@@ -130,6 +146,7 @@
   (routes [_] ["/" {"index.html" ::index
                     "" (redirect ::index)
                     "features.html" ::features
+                    "protected.html" ::protected
                     "about.html" ::about}])
 
   ;; A WebService can be 'mounted' underneath a common uri context
