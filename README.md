@@ -28,10 +28,10 @@ your modifications to be reloaded too).
 dev> (reset)
 ```
 
-To add a test user (uid: tangrammer pw: clojure) each time you reset your app
+To add a test user `[:uid "tangrammer" :password "clojure"]` each time you reset your app
 
 ```
-dev> (reset-app)
+dev> (reset+data)
 ```
 
 
@@ -41,7 +41,7 @@ Rinse and repeat.
 
 The MIT License (MIT)
 
-Copyright © 2014 Juan Antonio Ruz (juxt.pro)
+Copyright © 2014 [Juan A. Ruz](https://github.com/tangrammer) (juxt.pro)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

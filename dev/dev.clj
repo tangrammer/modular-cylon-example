@@ -75,9 +75,8 @@
 
     ))
 
-(defn reset-app []
+(defn reset+data []
   ;; reset && insert test user
-  (do
-    (reset)
-    (insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com"))
-  )
+  (reset)
+  (insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com")
+  :reset+data-ok)
