@@ -105,9 +105,9 @@
             (hiccup/html
              [:div
               [:h1.cover-heading "Protected Info"]
+              [:p (format "access-token: %s" (:cylon/access-token req))]
               [:p.lead "This page is only available when you are logged :-"]
               [:ul.lead
-               [:li "your personal info ..."]
                [:li "your personal info ..."]
                [:li "your personal info ..."]]]))))
       (wrap-require-authorization oauth-client :user)))

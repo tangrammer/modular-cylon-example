@@ -17,21 +17,20 @@
                                     :role "user"}))
 
   (get-user [this uid]
-    (when-let [row (-> token-store :tokens deref (get uid))]
+    (when-let [row (get-token-by-id token-store uid)]
       {:uid (:id row)
        :name (:name row)
        :email (:email row)}))
 
   (get-user-password-hash [this uid]
-    (when-let [row (-> token-store :tokens deref (get uid))]
-      (println row)
+    (when-let [row (get-token-by-id token-store uid)]
       {:hash (:password_hash row)
        :salt (:password_salt row)}))
 
   (set-user-password-hash! [this uid {:keys [hash salt]}]
     (merge-token! token-store uid
-                  {:hash (:password_hash hash)
-                   :salt (:password_salt salt)}))
+                  {:password_hash hash
+                   :password_salt salt}))
 
   (get-user-by-email [this email]
 
@@ -52,11 +51,9 @@
 
   OneTimePasswordStore
   (set-totp-secret [this identity encrypted-secret]
-    #_(j/insert! (:connection this) :totp_secrets {:user_id identity :secret encrypted-secret})
     )
 
   (get-totp-secret [this identity]
-    #_(:secret (first (j/query (:connection this) ["SELECT secret from totp_secrets WHERE user_id = ?" identity])))
    ))
 
 

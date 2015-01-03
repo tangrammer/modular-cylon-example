@@ -54,7 +54,7 @@
 
 (defn ^:private config-from-classpath
   []
-  (if-let [res (io/resource "foo.edn")]
+  (if-let [res (io/resource ".modular.edn")]
     (config-from (io/file res))
     {}))
 
@@ -176,7 +176,7 @@
 
     ;; This component provides all the Cylon callback functions for
     ;; email text and HTML responses for authorization server protocols.
-    :user-form-renderer (-> (new-user-form-renderer)
+    :user-form-renderer (-> (new-user-form-renderer :webapp-uri (str (get-in config [:webapp :location]) "/index.html"))
                             (using {:templater :clostache-templater-templater})
                             (co-using {:router :authorization-server-webrouter}))
 

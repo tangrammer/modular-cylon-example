@@ -34,12 +34,13 @@
   [model]
   (postwalk stringify-map-values model))
 
-(defrecord MyUserFormRenderer [templater router]
+(defrecord MyUserFormRenderer [templater router webapp-uri]
   LoginFormRenderer
   (render-login-form [this req model]
     (render-template templater
                      "templates/page.html.mustache"
-                     {:content
+                     {:webapp-uri webapp-uri
+                      :content
                       (let [template-model (model->template-model model)]
                         (render-resource
                          "templates/login.html.mustache"
@@ -51,7 +52,8 @@
   (render-signup-form [this req model]
     (render-template templater
                      "templates/page.html.mustache"
-                     {:content
+                     {:webapp-uri webapp-uri
+                      :content
                       (let [template-model (model->template-model model)]
                         (render-resource
                          "templates/signup.html.mustache"
@@ -71,7 +73,8 @@
   (render-email-verified [this req model]
     (render-template templater
                      "templates/page.html.mustache"
-                     {:content
+                     {:webapp-uri webapp-uri
+                      :content
                       (render-resource
                        "templates/email-verified.html.mustache"
                        (model->template-model model)
@@ -80,7 +83,8 @@
   (render-reset-password-request-form [this req model]
     (render-template templater
                      "templates/page.html.mustache"
-                     {:content
+                     {:webapp-uri webapp-uri
+                      :content
                       (render-resource
                        "templates/reset-password-request.html.mustache"
                        (model->template-model model)
@@ -93,7 +97,8 @@
   (render-reset-password-link-sent-response [this req model]
     (render-template templater
                      "templates/page.html.mustache"
-                     {:content
+                     {:webapp-uri webapp-uri
+                      :content
                       (render-resource
                        "templates/reset-password-link-sent.html.mustache"
                        (model->template-model model)
@@ -102,7 +107,8 @@
   (render-password-reset-form [this req model]
     (render-template templater
                      "templates/page.html.mustache"
-                     {:content
+                     {:webapp-uri webapp-uri
+                      :content
                       (render-resource
                        "templates/reset-password.html.mustache"
                        (model->template-model model)
@@ -111,7 +117,8 @@
   (render-password-changed-response [this req model]
         (render-template templater
                      "templates/page.html.mustache"
-                     {:content
+                     {:webapp-uri webapp-uri
+                      :content
                       (render-resource
                        "templates/password-changed.html.mustache"
                        (model->template-model model)
@@ -121,7 +128,8 @@
   (render-error-response [this req model]
     (render-template templater
                      "templates/page.html.mustache"
-                     {:content
+                     {:webapp-uri webapp-uri
+                      :content
                       (render-resource
                        "templates/error-page.html.mustache"
                        (merge (model->template-model model)

@@ -76,6 +76,8 @@
     ))
 
 (comment
-  ;; insert test user
-  (insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com")
+  ;; reset && insert test user
+  (do
+    (reset)
+    (insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com"))
   )
