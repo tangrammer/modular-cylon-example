@@ -41,7 +41,7 @@
                [:a (merge {:href href}) label]]
               ) oauth-item)]))
 
-(defn menu-extended [router req oauth-client logout-uri signup-uri]
+(defn menu-extended [router req oauth-client signup-uri]
   (menu router  (:uri req)
                  (if-not (:cylon/subject-identifier (authenticate oauth-client req))
                    [[:li
@@ -51,12 +51,10 @@
                       [:a (merge {:href signup-uri})
                        "Sign Up"]]]
                    [[:li
-                     [:a (merge {:href (str logout-uri
+                     [:a (merge {:href (str (path-for (:routes @router) :cylon.oauth.client.web-client/logout)
                                             "?post_logout_redirect_uri="
                                             (make-full-link req (:server-port req) @router ::index))})
                       "Log Out"]]])))
-
-
 
 (defn page [templater menu content]
   (response
@@ -66,9 +64,9 @@
     {:menu menu
      :content content})))
 
-(defn index [templater router oauth-client logout-uri signup-uri]
+(defn index [templater router oauth-client signup-uri]
   (fn [req]
-    (let [menu (menu-extended router req oauth-client logout-uri signup-uri)]
+    (let [menu (menu-extended router req oauth-client signup-uri)]
       (page templater menu
            (hiccup/html
             [:div
@@ -81,9 +79,9 @@
             from modular's bootstrap-cover template. This text can be
             found in " [:code "foo/website.clj"]] ])))))
 
-(defn features [templater router oauth-client logout-uri signup-uri]
+(defn features [templater router oauth-client signup-uri]
   (-> (fn [req]
-        (let [menu (menu-extended router req oauth-client logout-uri signup-uri)]
+        (let [menu (menu-extended router req oauth-client signup-uri)]
           (page templater menu
             (hiccup/html
              [:div
@@ -99,9 +97,9 @@
               [:p "This list can be found in " [:code "foo/website.clj"]]]))))
       (wrap-require-authorization oauth-client :user)))
 
-(defn about [templater router oauth-client logout-uri signup-uri]
+(defn about [templater router oauth-client  signup-uri]
   (fn [req]
-    (let [menu (menu-extended router req oauth-client logout-uri signup-uri)]
+    (let [menu (menu-extended router req oauth-client  signup-uri)]
       (page templater menu
            (hiccup/html
             [:div
@@ -114,7 +112,7 @@
 
 ;; Components are defined using defrecord.
 
-(defrecord Website [oauth-client templater router logout-uri signup-uri]
+(defrecord Website [oauth-client templater router  signup-uri]
 
   ; modular.bidi provides a router which dispatches to routes provided
   ; by components that satisfy its WebService protocol
@@ -122,9 +120,9 @@
   (request-handlers [this]
     ;; Return a map between some keywords and their associated Ring
     ;; handlers
-    {::index (index templater router oauth-client logout-uri signup-uri)
-     ::features (features templater router oauth-client logout-uri signup-uri)
-     ::about (about templater router oauth-client logout-uri signup-uri)})
+    {::index (index templater router oauth-client signup-uri)
+     ::features (features templater router oauth-client signup-uri)
+     ::about (about templater router oauth-client signup-uri)})
 
   ;; Return a bidi route structure, mapping routes to keywords defined
   ;; above. This additional level of indirection means we can generate

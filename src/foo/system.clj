@@ -102,9 +102,7 @@
   (assoc system
     :bootstrap-cover-website-website
     (->
-     (make new-website config :logout-uri (str (get-in config [:auth-server :location]) "/auth/logout")
-           :signup-uri (str (get-in config [:auth-server :location]) "/auth/signup")
-           )
+     (make new-website config :signup-uri (str (get-in config [:auth-server :location]) "/auth/signup"))
       (using {:oauth-client :webapp-oauth-client})
       (co-using []))))
 

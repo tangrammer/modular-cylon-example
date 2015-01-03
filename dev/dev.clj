@@ -77,5 +77,5 @@
 
 (comment
   ;; insert test user
-(insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com")
+  (insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com")
   )
