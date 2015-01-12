@@ -1,5 +1,6 @@
 (ns dev
   (:require
+  ; [rhizome :as r]
    [clojure.pprint :refer (pprint)]
    [clojure.reflect :refer (reflect)]
    [clojure.repl :refer (apropos dir doc find-doc pst source)]
@@ -80,3 +81,31 @@
   (reset)
   (insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com")
   :reset+data-ok)
+
+
+
+
+(comment
+  "this lines to generate with rhizome the images of http://tangrammer.github.io/posts/13-01-2015-using-cylon-oauth2.html"
+  ;; TODO: remove after publishing full doc
+  :http-listener-listener :authorization-server-http-listener
+
+:twitter-bootstrap-service  :jquery-resources :public-resources-public-resources
+:webapp-token-store :authorization-server-token-store :user-token-store :oauth-access-token-store
+:password-hash-algo
+:clostache-templater-templater
+
+  (->> (set [:jquery-resources :twitter-bootstrap-service :bootstrap-cover-website-website :public-resources-public-resources :clostache-templater-templater :modular-bidi-router-webrouter :http-listener-listener])
+      (r/system-graph system)
+      (r/save-system-image #{} #{}))
+
+
+  (->> (apply disj (set  (keys system )) [:http-listener-listener :authorization-server-http-listener
+                                          :webapp-token-store :authorization-server-token-store :user-token-store :oauth-access-token-store
+:twitter-bootstrap-service :jquery-resources :public-resources-public-resources
+                                          :clostache-templater-templater
+                                          :authorization-server-webrouter :modular-bidi-router-webrouter
+                                          ])
+      (r/system-graph system)
+      (r/save-system-image #{:logout :authorization-server :login :signup-form :reset-password} #{:webapp-oauth-client :bootstrap-cover-website-website}))
+ )

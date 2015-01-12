@@ -2,6 +2,8 @@
 
 This is a [juxt/modular](https://github.com/juxt/modular) and [juxt/cylon](https://github.com/juxt/cylon) (Oauth2) example integration
 
+You can read more [http://tangrammer.github.io](http://tangrammer.github.io/posts/13-01-2015-using-cylon-oauth2.html)
+
 ## Usage
 
 To run the application, install [Leiningen](http://leiningen.org/) and type
