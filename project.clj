@@ -30,7 +30,7 @@
    [prismatic/schema "0.3.3"]
    [ch.qos.logback/logback-classic "1.0.7" :exclusions [org.slf4j/slf4j-api]]
 
-   [cylon "0.5.0-20150112.231710-28"]
+   [cylon "0.5.0-20150113.090417-29"]
   ; [cheshire                "5.3.1"]
   ; [clj-jwt "0.0.8"]
    [liberator "0.11.0"  :exclusions [org.clojure/tools.logging org.clojure/tools.trace]]
