@@ -33,7 +33,7 @@
    [modular.bidi :refer (new-router new-static-resource-service new-web-service)]
    [modular.clostache :refer (new-clostache-templater)]
    [modular.http-kit :refer (new-webserver)]
-   [cylon.oauth.client.request-authenticator-client :refer (new-client-request-authenticator)]
+   [cylon.oauth.resource :refer (new-client-request-authenticator)]
    ))
 
 (defn ^:private read-file
