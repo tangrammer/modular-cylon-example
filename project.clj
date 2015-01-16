@@ -17,7 +17,7 @@
    [juxt.modular/maker "0.5.0"]
    [juxt.modular/wire-up "0.5.0"]
 
-   [malcolmsparks/co-dependency "0.1.5"]
+   [tangrammer/co-dependency "0.1.5"]
    [org.clojure/clojure "1.7.0-alpha4"]
    [org.clojure/tools.logging "0.2.6"]
    [org.clojure/tools.reader "0.8.9"]
@@ -46,6 +46,11 @@
                  :welcome (println "Type (dev) to start")}
 
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]
-;                                  [rhizome "0.2.1"]
+                                  [milesian/format-system-diagrams "0.1.3" :exclusions [http-kit]]
+                                  [milesian/bigbang "0.1.1"]
+                                  [milesian/aop "0.1.4"]
+                                  [milesian/system-examples "0.1.1-SNAPSHOT"]
+                                  [milesian/identity "0.1.3"]
+                                  [rhizome "0.2.1"]
                                   ]
                    :source-paths ["dev"]}})
