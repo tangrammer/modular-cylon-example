@@ -19,6 +19,7 @@
    [milesian.aop :as aop]
    [milesian.aop.utils  :refer (extract-data)]
    [milesian.system-diagrams :refer (store-message try-to-publish store)]
+   [milesian.system-diagrams.webclient.system :as wsd]
    ))
 
 
@@ -42,8 +43,11 @@
   (let [config (config)
         s-map (->
                (new-system-map config)
+               (wsd/add-websocket (wsd/config))
+               (wsd/add-webapp-server (wsd/config))
+
                #_(assoc
-                 ))]
+                     ))]
     (-> s-map
         (component/system-using (new-dependency-map))
         (co-dependency/system-co-using (new-co-dependency-map))
