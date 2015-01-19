@@ -5,4 +5,5 @@
                :port 8020}
 
  :resource-server {:location "http://localhost:8030"
-                   :port 8030}}
+                   :port 8030}
+ }

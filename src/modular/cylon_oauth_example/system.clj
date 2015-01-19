@@ -34,7 +34,9 @@
    [modular.clostache :refer (new-clostache-templater)]
    [modular.http-kit :refer (new-webserver)]
    [cylon.oauth.resource :refer (new-client-request-authenticator)]
+   [milesian.system-diagrams.webclient.system :as wsd]
    ))
+
 
 (defn ^:private read-file
   [f]
@@ -438,7 +440,12 @@
           (public-resources-components config)
           (bootstrap-cover-website-components config)
           (twitter-bootstrap-components config)
-          (jquery-components config)))))
+          (jquery-components config)
+          ;; webclient-system-diagram
+          (wsd/add-websocket (wsd/config))
+          (wsd/add-webapp-server (wsd/config))
+
+          ))))
 
 (defn new-dependency-map
   []

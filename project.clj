@@ -38,6 +38,8 @@
 
    [garden "1.1.5" :exclusions [org.clojure/clojure org.clojure/clojurescript]]
    [hiccup "1.0.5"]
+
+
    ]
 
   :main modular.cylon-oauth-example.main
@@ -46,7 +48,10 @@
                  :welcome (println "Type (dev) to start")}
 
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]
-                                  [milesian/format-system-diagrams "0.1.3" :exclusions [http-kit]]
+
+
+                                  [milesian/system-diagrams "0.1.2" ]
+
                                   [milesian/bigbang "0.1.1"]
                                   [milesian/aop "0.1.4"]
                                   [milesian/system-examples "0.1.1-SNAPSHOT"]

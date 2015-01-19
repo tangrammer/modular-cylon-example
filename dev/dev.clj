@@ -18,12 +18,11 @@
    [milesian.identity :as identity]
    [milesian.aop :as aop]
    [milesian.aop.utils  :refer (extract-data)]
-   [milesian.sequence-diagram :refer (store-message try-to-publish store)]
+   [milesian.system-diagrams :refer (store-message try-to-publish store)]
    ))
 
 
 (def system nil)
-
 
 (defn diagram
   "to get sequence diagram we need the ->start-fn-call and
@@ -34,7 +33,7 @@
     (store-message invocation-data :opened)
     (let [res (apply *fn* (conj args this))]
       (store-message invocation-data :closed)
-      (try-to-publish system)
+      (try-to-publish  #'dev/system)
       res)))
 
 (defn new-dev-system
@@ -71,7 +70,7 @@
     (alter-var-root #'system #(bigbang/expand % {:before-start [[identity/add-meta-key %]
                                                                 [identity/assoc-meta-who-to-deps]
                                                                 [co-dependency/assoc-co-dependencies future-system]]
-                                                 :after-start [[aop/wrap diagram]
+                                                 :after-start [[aop/wrap diagram ]
                                                               [co-dependency/update-atom-system future-system]]}))))
 
 (defn stop
