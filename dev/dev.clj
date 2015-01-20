@@ -83,6 +83,7 @@
 
 (defn reset+data []
   ;; reset && insert test user
-  (reset)
-  (insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com")
-  :reset+data-ok)
+  (when (= :ok (reset))
+    (insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com")
+    (pprint (-> system :user-store))
+    :reset+data-ok))
