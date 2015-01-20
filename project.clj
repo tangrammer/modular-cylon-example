@@ -50,12 +50,5 @@
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]
 
 
-                                  [milesian/system-diagrams "0.1.2" ]
-
-                                  [milesian/bigbang "0.1.1"]
-                                  [milesian/aop "0.1.4"]
-                                  [milesian/system-examples "0.1.1-SNAPSHOT"]
-                                  [milesian/identity "0.1.4-SNAPSHOT"]
-                                  [rhizome "0.2.1"]
                                   ]
                    :source-paths ["dev"]}})
