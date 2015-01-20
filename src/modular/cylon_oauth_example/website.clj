@@ -109,7 +109,7 @@
               [:ul.lead
                [:li "your personal info ..."]
                [:li "your personal info ..."]]]))))
-      (wrap-require-authorization oauth-client  :user)))
+      (wrap-require-authorization oauth-client  "https://www.googleapis.com/auth/calendar.readonly")))
 
 (defn about [templater router oauth-client signup-uri]
   (fn [req]

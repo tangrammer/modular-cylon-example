@@ -312,21 +312,17 @@
          :uri-context ""
          :redirection-uri (str (get-in config [:webapp :location]) "/grant")
          :post-logout-redirect-uri (str (get-in config [:webapp :location]) "/")
-
-         :required-scopes #{:user
-                            :user/write-devices
-                            :user/write-topics
-                            :user/create-private-topics
-                            :superuser/read-users
-                            :superuser/create-topics}
+         :client-id "480676242494-3p7ni947nvm0omlv2qr4nfn2hvvc2rci.apps.googleusercontent.com"
+         :client-secret "gJfKrzWBSUyBfiMCsmFOpRY5"
+         :required-scopes #{"https://www.googleapis.com/auth/calendar.readonly"}
 
          ;; Perhaps we could get these during dynamic registration with
          ;; the client-registry?
-         :authorize-uri
-         (str (get-in config [:auth-server :location]) "/auth/authorize")
+         :authorize-uri "https://accounts.google.com/o/oauth2/auth"
+;         (str (get-in config [:auth-server :location]) "/auth/authorize")
 
-         :access-token-uri
-         (str (get-in config [:auth-server :location]) "/auth/access-token")
+         :access-token-uri "https://accounts.google.com/o/oauth2/token"
+;         (str (get-in config [:auth-server :location]) "/auth/access-token")
 
          :end-session-endpoint
          (str (get-in config [:auth-server :location]) "/auth/logout")
