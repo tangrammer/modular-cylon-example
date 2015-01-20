@@ -30,7 +30,7 @@
    [prismatic/schema "0.3.3"]
    [ch.qos.logback/logback-classic "1.0.7" :exclusions [org.slf4j/slf4j-api]]
 
-   [cylon "0.5.0-20150115.103355-32"]
+   [cylon "0.5.0-20150120.154532-33"]
    [liberator "0.11.0"  :exclusions [org.clojure/tools.logging org.clojure/tools.trace]]
    ;; email
    [com.draines/postal "1.11.1"]
@@ -55,7 +55,7 @@
                                   [milesian/bigbang "0.1.1"]
                                   [milesian/aop "0.1.4"]
                                   [milesian/system-examples "0.1.1-SNAPSHOT"]
-                                  [milesian/identity "0.1.3"]
+                                  [milesian/identity "0.1.4-SNAPSHOT"]
                                   [rhizome "0.2.1"]
                                   ]
                    :source-paths ["dev"]}})

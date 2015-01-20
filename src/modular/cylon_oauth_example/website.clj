@@ -97,9 +97,9 @@
                ]
               [:p "This list can be found in " [:code "modular.cylon-oauth-example/website.clj"]]])))))
 
-(defn protected [templater router oauth-client authenticator signup-uri]
+(defn protected [templater router oauth-client  signup-uri]
   (-> (fn [req]
-        (let [menu (menu-extended router req authenticator signup-uri)]
+        (let [menu (menu-extended router req oauth-client signup-uri)]
           (page templater menu
             (hiccup/html
              [:div
@@ -109,7 +109,7 @@
               [:ul.lead
                [:li "your personal info ..."]
                [:li "your personal info ..."]]]))))
-      (wrap-require-authorization oauth-client authenticator :user)))
+      (wrap-require-authorization oauth-client  :user)))
 
 (defn about [templater router oauth-client signup-uri]
   (fn [req]
@@ -126,7 +126,7 @@
 
 ;; Components are defined using defrecord.
 
-(defrecord Website [oauth-client authenticator templater router signup-uri]
+(defrecord Website [oauth-client templater router signup-uri]
 
   ; modular.bidi provides a router which dispatches to routes provided
   ; by components that satisfy its WebService protocol
@@ -134,10 +134,10 @@
   (request-handlers [this]
     ;; Return a map between some keywords and their associated Ring
     ;; handlers
-    {::index (index templater router authenticator signup-uri)
-     ::features (features templater router authenticator signup-uri)
-     ::protected (protected templater router oauth-client authenticator signup-uri)
-     ::about (about templater router authenticator signup-uri)})
+    {::index (index templater router oauth-client signup-uri)
+     ::features (features templater router oauth-client signup-uri)
+     ::protected (protected templater router oauth-client signup-uri)
+     ::about (about templater router oauth-client signup-uri)})
 
   ;; Return a bidi route structure, mapping routes to keywords defined
   ;; above. This additional level of indirection means we can generate
@@ -158,5 +158,5 @@
 
 (defn new-website [& {:as opts}]
   (-> (map->Website opts)
-      (using [:templater :oauth-client :authenticator])
+      (using [:templater :oauth-client])
       (co-using [:router])))

@@ -33,7 +33,6 @@
    [modular.bidi :refer (new-router new-static-resource-service new-web-service)]
    [modular.clostache :refer (new-clostache-templater)]
    [modular.http-kit :refer (new-webserver)]
-   [cylon.oauth.resource :refer (new-client-request-authenticator)]
    ))
 
 
@@ -107,8 +106,7 @@
     :bootstrap-cover-website-website
     (->
      (make new-website config :signup-uri (str (get-in config [:auth-server :location]) "/auth/signup"))
-     (using {:oauth-client :webapp-oauth-client
-             :authenticator :client-request-authenticator})
+     (using {:oauth-client :webapp-oauth-client})
       (co-using []))))
 
 (defn twitter-bootstrap-components [system config]
@@ -278,14 +276,6 @@
     (-> (new-webserver :port (get-in config [:auth-server :port]) )
         (using {:request-handler :authorization-server-webrouter}))))
 
-(defn add-client-authenticator [system config]
-  (assoc system
-    :client-request-authenticator (-> (new-client-request-authenticator)
-                           (using {:access-token-store :oauth-access-token-store
-                                   :session-store :webapp-session-store}))
-    )
-  )
-
 (defn add-oauth-client
   "Add a web application.
 
@@ -431,7 +421,6 @@
           (add-user-store config)
           (add-emailer config)
           (add-authorization-server config)
-          (add-client-authenticator config)
           (add-oauth-client config)
           (http-listener-components config)
           (modular-bidi-router-components config)

@@ -130,9 +130,15 @@
 :password-hash-algo
 
 
-  (->> (set [:jquery-resources :twitter-bootstrap-service :bootstrap-cover-website-website :public-resources-public-resources :clostache-templater-templater :modular-bidi-router-webrouter :http-listener-listener])
+(->>
+ (disj (set (keys system)) :milesian.system-diagrams.webclient.system/ws-bridge :milesian.system-diagrams.webclient.system/webapp :milesian.system-diagrams.webclient.system/webapp-router :milesian.system-diagrams.webclient.system/webapp-listener
+       :http-listener-listener :authorization-server-http-listener
+       :oauth-access-token-store :webapp-token-store :authorization-server-token-store :user-token-store
+       :twitter-bootstrap-service  :jquery-resources :public-resources-public-resources
+       :clostache-templater-templater
+       :authorization-server-webrouter :modular-bidi-router-webrouter)
       (r/system-graph system)
-      (r/save-system-image #{} #{}))
+      (r/save-system-image  #{:authorization-server :logout :login :signup-form :reset-password} #{:bootstrap-cover-website-website :webapp-oauth-client}))
 
 
   (->> (disj (set (keys system)) :http-listener-listener :authorization-server-http-listener :webapp-token-store :authorization-server-token-store :user-token-store
