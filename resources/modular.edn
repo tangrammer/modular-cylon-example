@@ -6,4 +6,15 @@
 
  :resource-server {:location "http://localhost:8030"
                    :port 8030}
+ :github-oauth-client {:id "bd0e7c94997ee2e36a41"
+                :secret "85b0a8c9fa9caf2d297d03e12dff14e0ffc5d2fe"
+                :scopes #{"user"}
+                :authorize-uri "https://github.com/login/oauth/authorize"
+                :access-token-uri "https://github.com/login/oauth/access_token"}
+
+ :oauth-client {:scopes #{"https://www.googleapis.com/auth/calendar.readonly"}
+                  :id "480676242494-3p7ni947nvm0omlv2qr4nfn2hvvc2rci.apps.googleusercontent.com"
+                  :secret "gJfKrzWBSUyBfiMCsmFOpRY5"
+                  :authorize-uri "https://accounts.google.com/o/oauth2/auth"
+                  :access-token-uri "https://accounts.google.com/o/oauth2/token"}
  }
