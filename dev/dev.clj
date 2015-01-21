@@ -1,6 +1,6 @@
 (ns dev
   (:require
-   [rhizome :as r]
+
    [clojure.pprint :refer (pprint)]
    [clojure.reflect :refer (reflect)]
    [clojure.repl :refer (apropos dir doc find-doc pst source)]
@@ -73,9 +73,11 @@
   (let [future-system (atom system)]
     (alter-var-root #'system #(bigbang/expand % {:before-start [[identity/add-meta-key %]
                                                                 [identity/assoc-meta-who-to-deps]
-                                                                [co-dependency/assoc-co-dependencies future-system]]
+                                                                [co-dependency/assoc-co-dependencies future-system]
+                                                                ]
                                                  :after-start [[aop/wrap diagram ]
-                                                              [co-dependency/update-atom-system future-system]]}))))
+                                                               [co-dependency/update-atom-system future-system]
+                                                               ]}))))
 
 (defn stop
   "Shuts down and destroys the current development system."
@@ -116,33 +118,3 @@
   (reset)
   (insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com")
   :reset+data-ok)
-
-
-
-
-(comment
-  "this lines to generate with rhizome the images of http://tangrammer.github.io/posts/13-01-2015-using-cylon-oauth2.html"
-  ;; TODO: remove after publishing full doc
-  :http-listener-listener :authorization-server-http-listener
-
-
-:webapp-token-store :authorization-server-token-store :user-token-store :oauth-access-token-store
-:password-hash-algo
-
-
-(->>
- (disj (set (keys system)) :milesian.system-diagrams.webclient.system/ws-bridge :milesian.system-diagrams.webclient.system/webapp :milesian.system-diagrams.webclient.system/webapp-router :milesian.system-diagrams.webclient.system/webapp-listener
-       :http-listener-listener :authorization-server-http-listener
-       :oauth-access-token-store :webapp-token-store :authorization-server-token-store :user-token-store
-       :twitter-bootstrap-service  :jquery-resources :public-resources-public-resources
-       :clostache-templater-templater
-       :authorization-server-webrouter :modular-bidi-router-webrouter)
-      (r/system-graph system)
-      (r/save-system-image  #{:authorization-server :logout :login :signup-form :reset-password} #{:bootstrap-cover-website-website :webapp-oauth-client}))
-
-
-  (->> (disj (set (keys system)) :http-listener-listener :authorization-server-http-listener :webapp-token-store :authorization-server-token-store :user-token-store
-)
-      (r/system-graph system)
-      (r/save-system-image #{:twitter-bootstrap-service  :jquery-resources :public-resources-public-resources } #{:clostache-templater-templater}))
- )

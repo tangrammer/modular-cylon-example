@@ -33,6 +33,7 @@
    [modular.bidi :refer (new-router new-static-resource-service new-web-service)]
    [modular.clostache :refer (new-clostache-templater)]
    [modular.http-kit :refer (new-webserver)]
+   [modular.datomic :refer (new-datomic-connection new-datomic-database)]
    ))
 
 
@@ -67,6 +68,13 @@
   []
   (merge (config-from-classpath)
          (user-config)))
+
+(defn datomic-components [system config]
+  (assoc system
+    :dat-dat (new-datomic-database :uri "datomic:free://localhost:4334/mbrainz" :ephemeral? true)
+    :dat-conn (-> (new-datomic-connection )
+                  (using {:database :dat-dat}))
+))
 
 
 (defn http-listener-components [system config]
@@ -418,6 +426,7 @@
   (apply system-map
     (apply concat
       (-> {}
+          (datomic-components config)
           (add-user-store config)
           (add-emailer config)
           (add-authorization-server config)
