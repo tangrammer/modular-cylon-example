@@ -35,7 +35,6 @@
    [modular.http-kit :refer (new-webserver)]
    ))
 
-
 (defn ^:private read-file
   [f]
   (read
@@ -60,14 +59,12 @@
     (config-from (io/file res))
     {}))
 
-
 (defn config
   "Return a map of the static configuration used in the component
   constructors."
   []
   (merge (config-from-classpath)
          (user-config)))
-
 
 (defn http-listener-components [system config]
   (assoc system
@@ -117,7 +114,6 @@
       (using [])
       (co-using []))))
 
-
 (defn jquery-components [system config]
   (assoc system
     :jquery-resources
@@ -125,156 +121,6 @@
       (make new-static-resource-service config :uri-context "/jquery" :resource-prefix "META-INF/resources/webjars/jquery/2.1.0")
       (using [])
       (co-using []))))
-
-(defn add-user-store [system config]
-  (assoc system
-    :user-token-store
-    (new-atom-backed-token-store
-     :ttl-in-secs nil)
-    :user-store (-> (new-user-store)
-                    (using {:token-store :user-token-store} ))
-
-    ))
-
-(defn add-emailer [system config]
-  ;; Emails are sent via this component
-  (assoc system
-        :emailer  (new-emailer :settings (get config :sendgrid))))
-
-
-(defn add-authorization-server
-  "Add an OAuth2 authorization server. These components handle a wide
-  range of authentication and authorization concerns, including user
-  authentication (possibly multi-factor), user sign-up, password
-  verification and reset, email verification, scopes, issuing access
-  tokens and authorizing clients to use resources on behalf of
-  users.
-
-  See RFC-6749 for a more details on OAuth2."
-  [system config]
-  (assoc system
-
-    ;; We create a token store to track logged-in users.
-    :authorization-server-token-store
-    (new-atom-backed-token-store
-     :ttl-in-secs (* 60 60 24))
-
-    ;; We layer on a session store, using HTTP cookies to keep users
-    ;; logged in.
-    :authorization-server-session-store
-    (-> (new-cookie-session-store :cookie-id "authorization-server-session-id")
-        (using {:token-store :authorization-server-token-store}))
-
-
-    ;; We now specify the password hashing algorithm
-    :password-hash-algo (new-pbkdf2-hash)
-
-    ;; The durable password verifier is responsible for storing and
-    ;; verifying passwords, and generating and storing salts. Our
-    ;; database implementation satisfies cylon.user.protocols/UserStore.
-    :password-verifier
-    (-> (new-durable-password-verifier)
-        (using {:password-hash-algo :password-hash-algo
-                :user-store :user-store}))
-
-    ;; This component provides all the Cylon callback functions for
-    ;; email text and HTML responses for authorization server protocols.
-    :user-form-renderer (-> (new-user-form-renderer :webapp-uri (str (get-in config [:webapp :location]) "/index.html"))
-                            (using {:templater :clostache-templater-templater})
-                            (co-using {:router :authorization-server-webrouter}))
-
-
-    ;; A login form, which manages the authentication 'interaction' with
-    ;; a user, providing the outcome to other interested components.
-    :login
-    (-> (new-login :uri-context "/auth")
-        (using {:renderer :user-form-renderer
-                :user-store :user-store
-                :session-store :authorization-server-session-store
-                :password-verifier :password-verifier})
-        (co-using {:router :authorization-server-webrouter}))
-
-    ;; A reset-password form, which manages ....
-    :reset-password
-    (-> (new-reset-password :uri-context "/auth")
-        (using {:user-store :user-store
-                :session-store :authorization-server-session-store
-                :renderer :user-form-renderer
-                ;; TODO: Use a store that has a reset policy of a few hours
-                :verification-code-store :verification-code-store
-                :password-verifier :password-verifier
-                :emailer :emailer})
-        (co-using {:router :authorization-server-webrouter}))
-
-    ;; When OAuth clients contact the authorization server, it looks them up
-    ;; in its registry. Since registration of all clients is part of
-    ;; this system, we don't (yet) use a durable registry.
-    :oauth-client-registry (new-ref-backed-client-registry)
-
-    ;; One of the roles of an OAuth2 authorization server is to issue
-    ;; access tokens that can be used to access resources. This is
-    ;; specified here.
-    ;; Access tokens last 24 hours, but this is expected to be reduced
-    ;; once the capability to refresh tokens has been implemented.
-    :oauth-access-token-store (new-atom-backed-token-store
-                         :ttl-in-secs (* 60 60 24))
-
-    ;; Now for the authorization server.
-    :authorization-server
-    (-> (new-authorization-server
-         :scopes { ;; These you get when you sign up
-                  :user {:description "Read all your resources"} ; allows to read your devices/topics
-                  :user/write-resource {:description "Create new resource, and modify and delete your existing resources "}
-
-                  ;; These you get when you pay money
-                  :user/create-feature-resource {:description "Create featured resources"}
-                 }
-         :iss "https://cylon-demo.com"
-         :uri-context "/auth")
-        (using {:session-store :authorization-server-session-store
-                :authentication-handshake :login
-                :client-registry :oauth-client-registry
-                :access-token-store :oauth-access-token-store}))
-
-    ;; It is desirable for users to be able to explicitly logout of
-    ;; sessions.
-    :logout (-> (new-logout :uri-context "/auth")
-                (using
-                 {:session-store :authorization-server-session-store}))
-
-    ;; When users sign up, a verification code will be emailed to them,
-    ;; which allows us to authenticate email addresses. We must store
-    ;; these codes so that we know which user has been issued which
-    ;; code, and to verify the authenticity of a link when the user
-    ;; clicks on it from their email. Not every user will check their
-    ;; email immediately, so we set a grace period of 90 days.
-    :verification-code-store
-    (new-atom-backed-token-store
-     :ttl-in-secs (* 60 60 24 90)       ; 90 days
-     )
-
-    :signup-form
-    (-> (new-signup-with-totp :uri-context "/auth" :post-signup-redirect (str (get-in config [:webapp :location]) "/index.html"))
-        (using {:user-store :user-store
-                :password-verifier :password-verifier
-                :session-store :authorization-server-session-store
-                :renderer :user-form-renderer
-                :verification-code-store :verification-code-store
-                :emailer :emailer})
-        (co-using {:router :authorization-server-webrouter}))
-
-    ;; A bidi-compatible router brings together components that provide
-    ;; web services.
-    :authorization-server-webrouter
-    (-> (new-router)
-        (using [:authorization-server :login :reset-password :logout :signup-form :jquery-resources :public-resources-public-resources :twitter-bootstrap-service]))
-
-    ;; Finally, the router is made accessible over HTTP, using an
-    ;; http-kit listener. The authorization server is now fully defined
-    ;; and ready to start.
-    :authorization-server-http-listener
-    (-> (new-webserver :port (get-in config [:auth-server :port]) )
-        (using {:request-handler :authorization-server-webrouter}))))
 
 (defn add-oauth-client
   "Add a web application.
@@ -284,6 +130,7 @@
   (assoc system
     ;; TODO: Why doesn't web app need :web-resources? Is it duplicating
     ;; these routes?
+    :oauth-client-registry (new-ref-backed-client-registry)
 
     ;; The webapp establishes long running sessions with its users,
     ;; represented by durable tokens stored in PostgreSQL.
@@ -341,84 +188,13 @@
 
     ))
 
-#_(defn add-resource-server
-  "Add a resource server to test oauth with api calls (Liberator resources)."
-  [system config]
-  (assoc system
-
-    ;; We have already defined an oauth-access-token-store which the
-    ;; authorization server uses to store the access tokens it has
-    ;; issued. We need this token store to correlate incoming requests
-    ;; bearing access tokens with the authorization rights (scopes) that
-    ;; have been granted. Such requests will have an Authorization
-    ;; header using the Bearer token method of authorization (see
-    ;; RFC-6749).
-    :oauth-access-token-request-authenticator
-    (-> (new-access-token-request-authenticator)
-        (using {:access-token-store :oauth-access-token-store}))
-
-
-
-    ;; This dispatching authenticator dispatches based on the
-    ;; Authorization header in the request. Since we have multiple ways
-    ;; of authorizing access to resources, this component dispatches to
-    ;; the correct authenticator. (Note: we could easily add support for
-    ;; other authorization methods, such as Basic and Digest
-    ;; authorization).
-
-    :api-request-via-query-parameter-authenticator
-    (using (new-api-key-via-query-parameter-request-authenticator)
-           {:database :database})
-
-    :api-request-via-auth-header-authenticator
-    (new-authorization-header-request-authenticator
-     :mappings {"Bearer" :oauth-access-token-request-authenticator
-                "api-key" :api-key-via-auth-header-request-authenticator})
-
-    :api-request-authenticator
-    (using (new-either-request-authenticator)
-           [:api-request-via-query-parameter-authenticator
-            :api-request-via-auth-header-authenticator])
-
-    ;; The API is set of Liberator resources. The password verifier is
-    ;; only used by the API to hash passwords for new users that are
-    ;; created via the API. It does not use the password verifier for
-    ;; authentication.
-    :api
-    (-> (new-api :uri-context "/api/1.0")
-        (using {:database :database
-                :password-verifier :password-verifier
-                :messages-store :cassandra
-                :authenticator :api-request-authenticator
-                :emailer :emailer}))
-
-    ;; We combine these resources into a bidi-compatible router.
-    :resource-router
-    (-> (new-router)
-        (using [:api]))
-
-    :resource-ring-middleware
-    (-> (new-ring-middleware)
-        (using {:original-request-handler :resource-router}))
-
-    ;; Finally, the router is made accessible over HTTP, using an
-    ;; http-kit listener. The resource server is now fully defined
-    ;; and ready to start.
-    :resource-listener (-> (new-http-listener
-                            :port (get-in config [:resource-server :port]))
-                           (using {:request-handler :resource-ring-middleware}))))
-
-
 (defn new-system-map
   [config]
   (apply system-map
     (apply concat
       (-> {}
-          (add-user-store config)
-          (add-emailer config)
-          (add-authorization-server config)
           (add-oauth-client config)
-          (http-listener-components config)
+;          (http-listener-components config)
           (modular-bidi-router-components config)
           (clostache-templater-components config)
           (public-resources-components config)
@@ -430,7 +206,7 @@
 
 (defn new-dependency-map
   []
-  {:http-listener-listener {:request-handler :modular-bidi-router-webrouter},
+  {#_:http-listener-listener #_{:request-handler :modular-bidi-router-webrouter},
    :modular-bidi-router-webrouter {:public-resources :public-resources-public-resources,
                                    :website :bootstrap-cover-website-website,
                                    :twitter-bootstrap :twitter-bootstrap-service,

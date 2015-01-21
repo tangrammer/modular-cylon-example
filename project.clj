@@ -42,12 +42,19 @@
 
    ]
 
-  :main modular.cylon-oauth-example.main
+;  :main modular.cylon-oauth-example.main
+  :plugins [[lein-ring "0.9.1"]]
 
+  :ring {:handler modular.cylon-oauth-example.main/app
+         :init modular.cylon-oauth-example.main/init
+         :destroy modular.cylon-oauth-example.main/destroy}
+  :aot :all
   :repl-options {:init-ns user
                  :welcome (println "Type (dev) to start")}
 
-  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]
+  :profiles {:ring
+             {:open-browser? false, :stacktraces? false, :auto-reload? false}
+             :dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]
 
 
                                   ]

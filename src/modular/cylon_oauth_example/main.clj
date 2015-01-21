@@ -1,26 +1,38 @@
 (ns modular.cylon-oauth-example.main
   "Main entry point"
-  (:require clojure.pprint)
-  (:gen-class))
+  (:require clojure.pprint
+            [modular.cylon-oauth-example.system :refer (new-production-system)]
+            modular.cylon-oauth-example.main
+            com.stuartsierra.component
+            [tangrammer.component.co-dependency :refer (start-system)]
+            clojure.java.browse
+            [org.httpkit.server :refer (run-server)]))
 
-(defn -main [& args]
+(declare system)
+(declare app)
+(defn main [& args]
   ;; We eval so that we don't AOT anything beyond this class
-  (eval '(do (require 'modular.cylon-oauth-example.system)
-             (require 'modular.cylon-oauth-example.main)
-             (require 'com.stuartsierra.component)
-             (require 'tangrammer.component.co-dependency)
 
-             (require 'clojure.java.browse)
+  (println "Starting modular.cylon-oauth-example")
+  (let [system (-> (new-production-system)
+                   start-system)]
 
-             (println "Starting modular.cylon-oauth-example")
 
-             (let [system (->
-                           (modular.cylon-oauth-example.system/new-production-system)
-                           tangrammer.component.co-dependency/start-system)]
+    (println "System started")
+    (println "Ready...")
+    (def app (.request-handler (-> system :modular-bidi-router-webrouter)))
+    (def system system)
 
-               (println "System started")
-               (println "Ready...")
+    ;;               (run-server app {:port 8010})
+    #_(let [url (format "http://localhost:%d/" (-> #'system :http-listener-listener :port))]
+        (println (format "Browsing at %s" url))
+        (clojure.java.browse/browse-url url))))
 
-               (let [url (format "http://localhost:%d/" (-> system :http-listener-listener :port))]
-                 (println (format "Browsing at %s" url))
-                 (clojure.java.browse/browse-url url))))))
+
+(defn init []
+  (main)
+  (println app)
+   (println system)
+  )
+(defn destroy []
+  (.stop system))
