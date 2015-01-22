@@ -30,7 +30,7 @@
    [prismatic/schema "0.3.3"]
    [ch.qos.logback/logback-classic "1.0.7" :exclusions [org.slf4j/slf4j-api]]
 
-   [cylon "0.5.0-20150120.200409-35" :exclusions [com.stuartsierra/component org.clojure/clojure]]
+   [cylon "0.5.0-20150120.200409-35" :exclusions [com.stuartsierra/component org.clojure/clojure malcolmsparks/co-dependency]]
    [liberator "0.11.0"  :exclusions [org.clojure/tools.logging org.clojure/tools.trace]]
    ;; email
    [com.draines/postal "1.11.1"]
@@ -54,8 +54,5 @@
 
   :profiles {:ring
              {:open-browser? false, :stacktraces? false, :auto-reload? false}
-             :dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]
-
-
-                                  ]
+             :dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]]
                    :source-paths ["dev"]}})

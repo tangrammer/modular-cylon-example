@@ -1,12 +1,10 @@
 (ns modular.cylon-oauth-example.main
   "Main entry point"
-  (:require clojure.pprint
+  (:require
             [modular.cylon-oauth-example.system :refer (new-production-system)]
-            modular.cylon-oauth-example.main
-            com.stuartsierra.component
             [tangrammer.component.co-dependency :refer (start-system)]
-            clojure.java.browse
-            [org.httpkit.server :refer (run-server)]))
+;            [org.httpkit.server :refer (run-server)]
+            ))
 
 (declare system)
 (declare app)

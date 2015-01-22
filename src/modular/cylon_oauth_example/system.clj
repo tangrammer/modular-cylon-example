@@ -32,7 +32,7 @@
 
    [modular.bidi :refer (new-router new-static-resource-service new-web-service)]
    [modular.clostache :refer (new-clostache-templater)]
-   [modular.http-kit :refer (new-webserver)]
+;   [modular.http-kit :refer (new-webserver)]
    ))
 
 (defn ^:private read-file
@@ -66,7 +66,7 @@
   (merge (config-from-classpath)
          (user-config)))
 
-(defn http-listener-components [system config]
+#_(defn http-listener-components [system config]
   (assoc system
     :http-listener-listener
     (->

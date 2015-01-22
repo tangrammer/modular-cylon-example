@@ -1,5 +1,6 @@
-{:webapp {:location "http://localhost:8010"
-          :port 8010}
+{:webapp {:location #_"http://localhost:8010" "http://intrepid-pride-830.appspot.com/"
+          :port #_8010 80
+          }
 
  :auth-server {:location "http://localhost:8020"
                :port 8020}
