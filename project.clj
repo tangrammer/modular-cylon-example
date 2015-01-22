@@ -8,7 +8,7 @@
   [
    [hiccup "1.0.5"]
    [com.stuartsierra/component "0.2.2"]
-   [juxt.modular/bidi "0.6.1"]
+   [juxt.modular/bidi "0.6.1" :exclusions [org.clojure/clojure]]
    [juxt.modular/clostache "0.6.0"]
 
    [juxt.modular/bootstrap "0.2.0" :exclusions [cylon]]
@@ -53,7 +53,7 @@
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]
 
 
-                                  [milesian/system-diagrams "0.1.2" ]
+                                  [milesian/system-diagrams "0.1.3-SNAPSHOT" ]
 
                                   [milesian/bigbang "0.1.1"]
                                   [milesian/aop "0.1.4"]

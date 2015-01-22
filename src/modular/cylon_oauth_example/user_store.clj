@@ -6,7 +6,15 @@
               [plumbing.core :refer (<-)]))
 
 
-(defrecord MyUserStore [host port dbname user password token-store]
+(defprotocol Example
+  (call-datomic [_]))
+
+
+(defrecord MyUserStore [host port dbname user password token-store dat-conn]
+  Example
+  (call-datomic [this]
+    (component/stop dat-conn)
+    (component/start dat-conn))
   UserStore
   (create-user! [this uid {:keys [hash salt]} email user-details]
     (create-token! token-store uid {:id uid
@@ -61,4 +69,4 @@
   [& {:as opts}]
   (->> opts
        map->MyUserStore
-       (<- (using [:token-store]))))
+       (<- (using [:token-store :dat-conn]))))
