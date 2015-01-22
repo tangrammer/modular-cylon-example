@@ -20,8 +20,8 @@
     (println "Ready...")
     (def app (.request-handler (-> system :modular-bidi-router-webrouter)))
     (def system system)
-
-    ;;               (run-server app {:port 8010})
+    (comment (require '[org.httpkit.server :refer (run-server)])
+             (def s (run-server (.request-handler (-> system :modular-bidi-router-webrouter)) {:port 8010})))
     #_(let [url (format "http://localhost:%d/" (-> #'system :http-listener-listener :port))]
         (println (format "Browsing at %s" url))
         (clojure.java.browse/browse-url url))))

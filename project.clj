@@ -8,7 +8,7 @@
   [
    [hiccup "1.0.5"]
    [com.stuartsierra/component "0.2.2"]
-   [juxt.modular/bidi "0.6.1"]
+   [juxt.modular/bidi "0.6.1" :exclusions [org.clojure/clojure]]
    [juxt.modular/clostache "0.6.0"]
 
    [juxt.modular/bootstrap "0.2.0" :exclusions [cylon]]
@@ -29,8 +29,7 @@
    [prismatic/plumbing "0.2.2"]
    [prismatic/schema "0.3.3"]
    [ch.qos.logback/logback-classic "1.0.7" :exclusions [org.slf4j/slf4j-api]]
-
-   [cylon "0.5.0-20150120.200409-35" :exclusions [com.stuartsierra/component org.clojure/clojure malcolmsparks/co-dependency]]
+   [tangrammer/cylon "0.5.0-SNAPSHOT" :exclusions [com.stuartsierra/component org.clojure/clojure malcolmsparks/co-dependency]]
    [liberator "0.11.0"  :exclusions [org.clojure/tools.logging org.clojure/tools.trace]]
    ;; email
    [com.draines/postal "1.11.1"]
@@ -45,10 +44,10 @@
 ;  :main modular.cylon-oauth-example.main
   :plugins [[lein-ring "0.9.1"]]
 
-  :ring {:handler modular.cylon-oauth-example.main/app
+  #_:ring #_{:handler modular.cylon-oauth-example.main/app
          :init modular.cylon-oauth-example.main/init
          :destroy modular.cylon-oauth-example.main/destroy}
-  :aot :all
+  #_:aot #_:all
   :repl-options {:init-ns user
                  :welcome (println "Type (dev) to start")}
 

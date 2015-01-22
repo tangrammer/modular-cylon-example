@@ -87,3 +87,9 @@
     (insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com")
     (pprint (-> system :user-store))
     :reset+data-ok))
+
+(comment
+  (do
+    (require '[org.httpkit.server :refer (run-server)])
+    (def s (run-server (.request-handler (-> system :modular-bidi-router-webrouter)) {:port 8010})))
+  )
