@@ -1,4 +1,4 @@
-{:webapp {:location #_"http://localhost:8010" "http://intrepid-pride-830.appspot.com/"
+{:webapp {:location #_"http://localhost:8010" "http://intrepid-pride-830.appspot.com"
           :port #_8010 80
           }
 
@@ -14,8 +14,8 @@
                 :access-token-uri "https://github.com/login/oauth/access_token"}
 
  :oauth-client {:scopes #{"https://www.googleapis.com/auth/calendar.readonly"}
-                  :id "480676242494-3p7ni947nvm0omlv2qr4nfn2hvvc2rci.apps.googleusercontent.com"
-                  :secret "gJfKrzWBSUyBfiMCsmFOpRY5"
+                  :id "817533269951-0490104ret2fvkjig8nq5l6jvh05k4gn.apps.googleusercontent.com"
+                  :secret "UKH7s5uW2Is0hFJxdTMMEy4H"
                   :authorize-uri "https://accounts.google.com/o/oauth2/auth"
                   :access-token-uri "https://accounts.google.com/o/oauth2/token"}
  }

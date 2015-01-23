@@ -44,10 +44,10 @@
 ;  :main modular.cylon-oauth-example.main
   :plugins [[lein-ring "0.9.1"]]
 
-  #_:ring #_{:handler modular.cylon-oauth-example.main/app
+  :ring {:handler modular.cylon-oauth-example.main/app
          :init modular.cylon-oauth-example.main/init
          :destroy modular.cylon-oauth-example.main/destroy}
-  #_:aot #_:all
+  :aot :all
   :repl-options {:init-ns user
                  :welcome (println "Type (dev) to start")}
 
