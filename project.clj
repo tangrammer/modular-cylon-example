@@ -38,6 +38,11 @@
    [garden "1.1.5" :exclusions [org.clojure/clojure org.clojure/clojurescript]]
    [hiccup "1.0.5"]
 
+[milesian/format-system-diagrams "0.1.3" :exclusions [http-kit]]
+                                  [milesian/bigbang "0.1.1"]
+                                  [milesian/aop "0.1.5"]
+                                  [milesian/system-examples "0.1.1-SNAPSHOT"]
+                                  [milesian/identity "0.1.3"]
 
    ]
 
