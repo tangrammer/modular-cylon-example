@@ -13,7 +13,8 @@
    [bidi.bidi :refer (match-route path-for)]
    [modular.wire-up :refer (normalize-dependency-map)]
 
-
+   [defrecord-wrapper.aop :refer (Matcher)]
+   [modular.bidi :refer (WebService request-handlers)]
    [milesian.bigbang :as bigbang]
    [milesian.identity :as identity]
    [milesian.aop :as aop]
@@ -31,11 +32,70 @@
   The sequence will be published if all fns are finished (:closed)"
   [*fn* this & args]
   (let [invocation-data (extract-data *fn* this args)]
+;    (println invocation-data)
     (store-message invocation-data :opened)
     (let [res (apply *fn* (conj args this))]
       (store-message invocation-data :closed)
       (try-to-publish  #'dev/system)
       res)))
+(defprotocol Identificate
+  (id* [_ fn]))
+
+(comment
+  (if (not= {} (request-handlers this))
+          (reduce-kv (fn [s k v]
+                      (assoc s k (do
+                                   (println (str "returning " k))
+                                   (fn [req]
+                                     #_(println k ((juxt :id :who) (extract-data  *fn* this  args)))
+                                     #_(store-message  (extract-data  *fn* this  args)
+                                                     :opened)
+                                     (let [res (v req)]
+                                       #_(store-message  (extract-data  *fn* this  args)
+
+                                                       :closed)
+                                       #_(try-to-publish  #'dev/system)
+                                       res)
+                                     )))
+                      )  {}
+                         (request-handlers this))
+          (request-handlers this)
+          ))
+
+(defrecord DiagramMatcher [the-fn]
+  Matcher
+  (match [this protocol function-name function-args]
+    (if (and (= protocol WebService) (= (str function-name) "request-handlers") )
+      (fn [*fn* this & args]
+        (let [invocation-data (extract-data *fn* this args)]
+          ;;(println invocation-data)
+          (store-message invocation-data :opened)
+          (let [res (apply *fn* (conj args this))]
+            (store-message invocation-data :closed)
+            (try-to-publish  #'dev/system)
+            (reduce-kv (fn [s k v]
+                      (assoc s k (do
+
+                                   (fn [req]
+                                     (println (str "returning " k))
+                                     #_(store-message  (extract-data  *fn* this  args)
+
+                                                       :opened)
+                                     (let [res (v req)]
+                                       #_(store-message  (extract-data  *fn* this  args)
+
+                                                       :closed)
+                                       #_(try-to-publish  #'dev/system)
+                                       res)
+                                     )))
+                      )  {}
+                         res)))
+
+
+        #_(println (class this) )
+        )
+      the-fn)))
+
 
 (defn new-dev-system
   "Create a development system"
@@ -74,7 +134,7 @@
     (alter-var-root #'system #(bigbang/expand % {:before-start [[identity/add-meta-key %]
                                                                 [identity/assoc-meta-who-to-deps]
                                                                 [co-dependency/assoc-co-dependencies future-system]]
-                                                 :after-start [[aop/wrap diagram ]
+                                                 :after-start [[aop/wrap (DiagramMatcher. diagram) ]
                                                               [co-dependency/update-atom-system future-system]]}))))
 
 (defn stop
