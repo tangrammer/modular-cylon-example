@@ -126,13 +126,6 @@
 
 ;; Components are defined using defrecord.
 
-(defprotocol Identificate
-  (id* [_ fn]))
-(defn t [*fn* this & args]
-  (fn [req]
-
-    (println (str "invoking " (meta *fn*)))
-    (*fn*  req)))
 (defrecord Website [oauth-client templater router signup-uri]
 
 
@@ -140,24 +133,12 @@
   ; by components that satisfy its WebService protocol
   WebService
   (request-handlers [this]
-    (println "i'm being called!")
     ;; Return a map between some keywords and their associated Ring
     ;; handlers
-    (reduce-kv (fn [s k v]
-                 (assoc s k (do
-                              (println (str "returning " k))
-                              (t
-                               (with-meta v
-                                 {:function-name k
-                                  :function-args "req"
-                                  :protocol  (:on Identificate)
-                                  :wrapper this})
-                               this)))
-                 )  {}
-                    {::index (index templater router oauth-client signup-uri)
+    {::index (index templater router oauth-client signup-uri)
                      ::features (features templater router oauth-client signup-uri)
                      ::protected (protected templater router oauth-client signup-uri)
-                     ::about (about templater router oauth-client signup-uri)}))
+                     ::about (about templater router oauth-client signup-uri)})
 
   ;; Return a bidi route structure, mapping routes to keywords defined
   ;; above. This additional level of indirection means we can generate
