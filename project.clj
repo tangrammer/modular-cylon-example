@@ -47,7 +47,7 @@
   :ring {:handler modular.cylon-oauth-example.main/app
          :init modular.cylon-oauth-example.main/init
          :destroy modular.cylon-oauth-example.main/destroy}
-  :aot :all
+;  :aot :all
   :repl-options {:init-ns user
                  :welcome (println "Type (dev) to start")}
 

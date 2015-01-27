@@ -32,7 +32,7 @@
 
    [modular.bidi :refer (new-router new-static-resource-service new-web-service)]
    [modular.clostache :refer (new-clostache-templater)]
-;   [modular.http-kit :refer (new-webserver)]
+   [modular.http-kit :refer (new-webserver)]
    ))
 
 (defn ^:private read-file
@@ -66,12 +66,12 @@
   (merge (config-from-classpath)
          (user-config)))
 
-#_(defn http-listener-components [system config]
+(defn http-listener-components [system config]
   (assoc system
     :http-listener-listener
     (->
      (make new-webserver config :port (get-in config [:webapp :port]))
-     (using [])
+     (using {:request-handler :modular-bidi-router-webrouter})
      (co-using []))))
 
 (defn modular-bidi-router-components [system config]
@@ -206,8 +206,7 @@
 
 (defn new-dependency-map
   []
-  {#_:http-listener-listener #_{:request-handler :modular-bidi-router-webrouter},
-   :modular-bidi-router-webrouter {:public-resources :public-resources-public-resources,
+  { :modular-bidi-router-webrouter {:public-resources :public-resources-public-resources,
                                    :website :bootstrap-cover-website-website,
                                    :twitter-bootstrap :twitter-bootstrap-service,
                                    :jquery :jquery-resources

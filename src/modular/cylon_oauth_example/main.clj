@@ -3,8 +3,7 @@
   (:require
             [modular.cylon-oauth-example.system :refer (new-production-system)]
             [tangrammer.component.co-dependency :refer (start-system)]
-;            [org.httpkit.server :refer (run-server)]
-            ))
+            [modular.ring :refer (request-handler)]))
 
 (declare system)
 (declare app)
@@ -18,13 +17,8 @@
 
     (println "System started")
     (println "Ready...")
-    (def app (.request-handler (-> system :modular-bidi-router-webrouter)))
-    (def system system)
-    (comment (require '[org.httpkit.server :refer (run-server)])
-             (def s (run-server (.request-handler (-> system :modular-bidi-router-webrouter)) {:port 8010})))
-    #_(let [url (format "http://localhost:%d/" (-> #'system :http-listener-listener :port))]
-        (println (format "Browsing at %s" url))
-        (clojure.java.browse/browse-url url))))
+    (def app (request-handler (-> system :modular-bidi-router-webrouter)))
+    (def system system)))
 
 
 (defn init []

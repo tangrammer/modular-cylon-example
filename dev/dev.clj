@@ -7,11 +7,11 @@
    [clojure.java.io :as io]
    [com.stuartsierra.component :as component]
    [tangrammer.component.co-dependency :as co-dependency]
-   [modular.cylon-oauth-example.system :refer (config new-system-map new-dependency-map new-co-dependency-map)]
+   [modular.cylon-oauth-example.system :refer (config new-system-map new-dependency-map new-co-dependency-map http-listener-components)]
    [modular.maker :refer (make)]
    [bidi.bidi :refer (match-route path-for)]
    [modular.wire-up :refer (normalize-dependency-map)]
-
+   [modular.ring :refer (request-handler)]
 
    ))
 
@@ -24,6 +24,7 @@
   (let [config (config)
         s-map (->
                (new-system-map config)
+               (http-listener-components config)
                #_(assoc
                      ))]
     (-> s-map
@@ -87,9 +88,3 @@
     (insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com")
     (pprint (-> system :user-store))
     :reset+data-ok))
-
-(comment
-  (do
-    (require '[org.httpkit.server :refer (run-server)])
-    (def s (run-server (.request-handler (-> system :modular-bidi-router-webrouter)) {:port 8010})))
-  )
