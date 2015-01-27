@@ -54,6 +54,6 @@
                                   [milesian/aop "0.1.5"]
                                   [milesian/system-examples "0.1.1-SNAPSHOT"]
                                   [milesian/identity "0.1.4"]
-                                  [rhizome "0.2.1"]
+;                                  [rhizome "0.2.1"]
                                   ]
                    :source-paths ["dev"]}})

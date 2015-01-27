@@ -1,6 +1,6 @@
 (ns dev
   (:require
-   [rhizome :as r]
+;   [rhizome :as r]
    [clojure.pprint :refer (pprint)]
    [clojure.reflect :refer (reflect)]
    [clojure.repl :refer (apropos dir doc find-doc pst source)]
@@ -21,6 +21,11 @@
    [milesian.aop.utils  :refer (extract-data)]
    [milesian.system-diagrams :refer (store-message try-to-publish store)]
    [milesian.system-diagrams.webclient.system :as wsd]
+
+   [org.httpkit.client :refer (request) :rename {request http-request}]
+   [cheshire.core :refer (encode decode-stream decode)]
+   [clojure.java.io :as io]
+   [clojure.data.json :as json]
    ))
 
 
@@ -33,63 +38,42 @@
   [*fn* this & args]
   (let [invocation-data (extract-data *fn* this args)]
 ;    (println invocation-data)
-    (store-message invocation-data :opened)
+;    (store-message invocation-data :opened)
     (let [res (apply *fn* (conj args this))]
-      (store-message invocation-data :closed)
-      (try-to-publish  #'dev/system)
+ ;     (store-message invocation-data :closed)
+  ;    (try-to-publish  #'dev/system)
       res)))
 (defprotocol Identificate
   (id* [_ fn]))
 
-(comment
-  (if (not= {} (request-handlers this))
-          (reduce-kv (fn [s k v]
-                      (assoc s k (do
-                                   (println (str "returning " k))
-                                   (fn [req]
-                                     #_(println k ((juxt :id :who) (extract-data  *fn* this  args)))
-                                     #_(store-message  (extract-data  *fn* this  args)
-                                                     :opened)
-                                     (let [res (v req)]
-                                       #_(store-message  (extract-data  *fn* this  args)
 
-                                                       :closed)
-                                       #_(try-to-publish  #'dev/system)
-                                       res)
-                                     )))
-                      )  {}
-                         (request-handlers this))
-          (request-handlers this)
-          ))
 
 (defrecord DiagramMatcher [the-fn]
   Matcher
   (match [this protocol function-name function-args]
     (if (and (= protocol WebService) (= (str function-name) "request-handlers") )
       (fn [*fn* this & args]
-        (let [invocation-data (extract-data *fn* this args)]
-          ;;(println invocation-data)
-          (store-message invocation-data :opened)
-          (let [res (apply *fn* (conj args this))]
-            (store-message invocation-data :closed)
-            (try-to-publish  #'dev/system)
+        (let [invocation-data (extract-data *fn* this args)
+              res (apply *fn* (conj args this))]
+          (if (= (:bigbang/key (meta this))  :milesian.system-diagrams.webclient.system/webapp)
+            res
             (reduce-kv (fn [s k v]
-                      (assoc s k (do
+                         (assoc s k (fn [req]
+ ;                                     (println (str "returning " k))
+                                      (let [data {:who (:who invocation-data), :id (:id invocation-data), :fn-name (name k) , :fn-args "req",
+                                                  :protocol (:on WebService)}]
+                                        #_(store-message  data
 
-                                   (fn [req]
-                                     (println (str "returning " k))
-                                     #_(store-message  (extract-data  *fn* this  args)
+                                                        :opened)
+                                        (let [res (v req)]
+                                          #_(store-message  data
 
-                                                       :opened)
-                                     (let [res (v req)]
-                                       #_(store-message  (extract-data  *fn* this  args)
-
-                                                       :closed)
-                                       #_(try-to-publish  #'dev/system)
-                                       res)
-                                     )))
-                      )  {}
-                         res)))
+                                                          :closed)
+                                          #_(try-to-publish  #'dev/system)
+                                          res))
+                                      ))
+                         )  {}
+                            res)))
 
 
         #_(println (class this) )
@@ -205,4 +189,34 @@
 )
       (r/system-graph system)
       (r/save-system-image #{:twitter-bootstrap-service  :jquery-resources :public-resources-public-resources } #{:clostache-templater-templater}))
+  )
+(defmacro my-time
+  "Evaluates expr and prints the time it took.  Returns the value of
+ expr."
+  {:added "1.0"}
+  [expr]
+  `(let [start# (. System (nanoTime))
+         ret# ~expr]
+     (prn (/ (double (- (. System (nanoTime)) start#)) 1000000.0))
+     ret#))
+
+(defn tester []
+ (-> (map (fn [_] (with-out-str(time (do (deref (http-request
+                                             {:method :get
+                                              :url "http://localhost:8010/protected.html"
+                                        ;                     :headers {"content-type" "application/x-www-form-urlencoded"}
+
+                                              }
+
+                                             ;; TODO Arguably we need better error handling here
+                                             #(if (:error %)
+                                                (do
+                                                  (println (:error %))
+                                                  %)
+                                                (update-in % [:body]  (fn [_] ((comp (partial clojure.string/join "\n") line-seq io/reader) (:body %) :encoding "UTF-8")
+                                                                        )))))
+                                     nil)
+                                    ))) (range 15))
+     pprint)
+
  )
