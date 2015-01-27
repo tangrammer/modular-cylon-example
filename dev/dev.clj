@@ -88,3 +88,60 @@
     (insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com")
     (pprint (-> system :user-store))
     :reset+data-ok))
+
+
+(comment
+
+  "correct data y response"
+  curl https://www.googleapis.com/userinfo/v2/me?access_token=ya29.CAHlPdGnZg4-vdt7bdoP2_HuahmhuMPaQRYQQB0YlX2Gq5XfXH1j4B7qmJDrsKrY203ikqM3cr4C9w
+
+{
+ "id": "110671093781330642976",
+ "name": "JUAN ANTONIO Ruz",
+ "given_name": "JUAN ANTONIO",
+ "family_name": "Ruz",
+ "link": "https://plus.google.com/110671093781330642976",
+ "picture": "https://lh4.googleusercontent.com/-_tX78fJlNPc/AAAAAAAAAAI/AAAAAAAAFeQ/MlFtcBlNnI0/photo.jpg",
+ "gender": "male",
+ "locale": "es"
+ }
+
+"with an old access-token"
+curl https://www.googleapis.com/userinfo/v2/me?access_token=ya29.AQHkeukl8aQNazx0BD_Gvp5kqzK_DdVtj1sdODo9aDCe6PGOWncWAsvqj-_gScdBjVIvSYqw8qOmmQ
+{
+ "error": {
+  "errors": [
+   {
+    "domain": "global",
+    "reason": "authError",
+    "message": "Invalid Credentials",
+    "locationType": "header",
+    "location": "Authorization"
+   }
+  ],
+  "code": 401,
+  "message": "Invalid incorrect"
+ }
+}
+
+
+ "Credentials access_token it has a character less"
+curl https://www.googleapis.com/userinfo/v2/me?access_token=ya29.CAHlPdGnZg4-vdt7bdoP2_HuahmhuMPaQRYQQB0YlX2Gq5XfXH1j4B7qmJDrsKrY203ikqM3cr4C9
+{
+ "error": {
+  "errors": [
+   {
+    "domain": "global",
+    "reason": "authError",
+    "message": "Invalid Credentials",
+    "locationType": "header",
+    "location": "Authorization"
+   }
+  ],
+  "code": 401,
+  "message": "Invalid Credentials"
+ }
+}
+
+
+)
