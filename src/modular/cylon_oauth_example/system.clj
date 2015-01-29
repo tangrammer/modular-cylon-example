@@ -32,7 +32,7 @@
 
    [modular.bidi :refer (new-router new-static-resource-service new-web-service)]
    [modular.clostache :refer (new-clostache-templater)]
-   [modular.http-kit :refer (new-webserver)]
+   [modular.cylon-oauth-example.employees-store :refer (new-employees-store)]
    ))
 
 (defn ^:private read-file
@@ -66,13 +66,6 @@
   (merge (config-from-classpath)
          (user-config)))
 
-(defn http-listener-components [system config]
-  (assoc system
-    :http-listener-listener
-    (->
-     (make new-webserver config :port (get-in config [:webapp :port]))
-     (using {:request-handler :modular-bidi-router-webrouter})
-     (co-using []))))
 
 (defn modular-bidi-router-components [system config]
   (assoc system
@@ -102,8 +95,10 @@
   (assoc system
     :bootstrap-cover-website-website
     (->
-     (make new-website config :signup-uri (str (get-in config [:auth-server :location]) "/auth/signup"))
-     (using {:oauth-client :webapp-oauth-client})
+     (make new-website config :signup-uri (str (get-in config [:auth-server :location]) "/auth/signup")
+           :employees-allowed (:employees-allowed config))
+     (using {:oauth-client :webapp-oauth-client
+             :employees-store :employees-store})
       (co-using []))))
 
 (defn twitter-bootstrap-components [system config]
@@ -188,6 +183,11 @@
 
     ))
 
+(defn google-datastore-component [system config]
+  (assoc system
+    :employees-store
+    (new-employees-store)))
+
 (defn new-system-map
   [config]
   (apply system-map
@@ -199,6 +199,7 @@
           (clostache-templater-components config)
           (public-resources-components config)
           (bootstrap-cover-website-components config)
+          (google-datastore-component config)
           (twitter-bootstrap-components config)
           (jquery-components config)
 

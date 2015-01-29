@@ -7,14 +7,29 @@
    [clojure.java.io :as io]
    [com.stuartsierra.component :as component]
    [tangrammer.component.co-dependency :as co-dependency]
-   [modular.cylon-oauth-example.system :refer (config new-system-map new-dependency-map new-co-dependency-map http-listener-components)]
+   [modular.cylon-oauth-example.system :refer (config new-system-map new-dependency-map new-co-dependency-map)]
    [modular.maker :refer (make)]
    [bidi.bidi :refer (match-route path-for)]
    [modular.wire-up :refer (normalize-dependency-map)]
    [modular.ring :refer (request-handler)]
+   [modular.http-kit :refer (new-webserver)]
+   [modular.cylon-oauth-example.employees-mock-store :refer (new-employees-store)]
+   )
+  )
 
-   ))
 
+(defn http-listener-components [system config]
+  (assoc system
+    :http-listener-listener
+    (->
+     (make new-webserver config :port (get-in config [:webapp :port]))
+     (component/using {:request-handler :modular-bidi-router-webrouter})
+     (co-dependency/co-using []))))
+
+(defn google-datastore-mock-component [system config]
+  (assoc system
+    :employees-store
+    (new-employees-store)))
 
 (def system nil)
 
@@ -25,6 +40,7 @@
         s-map (->
                (new-system-map config)
                (http-listener-components config)
+               (google-datastore-mock-component config)
                #_(assoc
                      ))]
     (-> s-map
@@ -89,59 +105,21 @@
     (pprint (-> system :user-store))
     :reset+data-ok))
 
+(defn get-refresh-token []
+  (-> system :webapp-session-store :token-store :tokens  deref first second :cylon/refresh-token ))
 
-(comment
-
-  "correct data y response"
-  curl https://www.googleapis.com/userinfo/v2/me?access_token=ya29.CAHlPdGnZg4-vdt7bdoP2_HuahmhuMPaQRYQQB0YlX2Gq5XfXH1j4B7qmJDrsKrY203ikqM3cr4C9w
-
-{
- "id": "110671093781330642976",
- "name": "JUAN ANTONIO Ruz",
- "given_name": "JUAN ANTONIO",
- "family_name": "Ruz",
- "link": "https://plus.google.com/110671093781330642976",
- "picture": "https://lh4.googleusercontent.com/-_tX78fJlNPc/AAAAAAAAAAI/AAAAAAAAFeQ/MlFtcBlNnI0/photo.jpg",
- "gender": "male",
- "locale": "es"
- }
-
-"with an old access-token"
-curl https://www.googleapis.com/userinfo/v2/me?access_token=ya29.AQHkeukl8aQNazx0BD_Gvp5kqzK_DdVtj1sdODo9aDCe6PGOWncWAsvqj-_gScdBjVIvSYqw8qOmmQ
-{
- "error": {
-  "errors": [
-   {
-    "domain": "global",
-    "reason": "authError",
-    "message": "Invalid Credentials",
-    "locationType": "header",
-    "location": "Authorization"
-   }
-  ],
-  "code": 401,
-  "message": "Invalid incorrect"
- }
-}
+(defn refresh-token []
+ (apply cylon.oauth.client/refresh-token*
+        (-> ((juxt :access-token-uri :client-id :client-secret) (-> system :webapp-oauth-client))
+            (conj (get-refresh-token)))))
 
 
- "Credentials access_token it has a character less"
-curl https://www.googleapis.com/userinfo/v2/me?access_token=ya29.CAHlPdGnZg4-vdt7bdoP2_HuahmhuMPaQRYQQB0YlX2Gq5XfXH1j4B7qmJDrsKrY203ikqM3cr4C9
-{
- "error": {
-  "errors": [
-   {
-    "domain": "global",
-    "reason": "authError",
-    "message": "Invalid Credentials",
-    "locationType": "header",
-    "location": "Authorization"
-   }
-  ],
-  "code": 401,
-  "message": "Invalid Credentials"
- }
-}
+(defn me [access-token]
+  (let [r (cylon.oauth.client/http-request-form :get "https://www.googleapis.com/userinfo/v2/me"
+                                                nil
+                                                {"Authorization" (str "Bearer " access-token)})]
 
-
-)
+      (if-not (get-in r [:body "error"])
+      {:email (get (:body r) "email")
+       :name (get (:body r) "name")}
+      (println (get-in r [:body "error"])))))

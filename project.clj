@@ -39,9 +39,10 @@
    [hiccup "1.0.5"]
 
 
+   [com.google.appengine/appengine-api-1.0-sdk "1.9.15"]
    ]
 
-;  :main modular.cylon-oauth-example.main
+  ;;  :main modular.cylon-oauth-example.main
   :plugins [[lein-ring "0.9.1"]]
 
   :ring {:handler modular.cylon-oauth-example.main/app
@@ -51,7 +52,14 @@
   :repl-options {:init-ns user
                  :welcome (println "Type (dev) to start")}
 
+;;  :resource-paths ["lib/appengine-api.jar" "lib/appengine-api-labs.jar" "lib/appengine-stubs.jar" "lib/appengine-testing.jar" ]
+
   :profiles {:ring
              {:open-browser? false, :stacktraces? false, :auto-reload? false}
-             :dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]]
+             :dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]
+                                  [com.google.appengine/appengine-api-1.0-sdk "1.9.15"]
+                                  [com.google.appengine/appengine-testing "1.9.15"]
+                                  [com.google.appengine/appengine-api-stubs "1.9.15"]
+                                  [com.google.appengine/appengine-api-labs "1.9.15"]
+                                  ]
                    :source-paths ["dev"]}})

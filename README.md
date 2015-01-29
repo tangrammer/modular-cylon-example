@@ -12,6 +12,24 @@ To run the application, install [Leiningen](http://leiningen.org/) and type
 lein run
 ```
 
+## Deploy GAE
+
+```clojure
+lein clean
+lein ring uberwar
+unzip target/cylon-oauth2-demo-0.1.0-SNAPSHOT-standalone.war -d target/war
+cp appengine-web.xml target/war/WEB-INF/
+appcfg.sh --oauth2 update target/war/
+
+```
+
+```clojure
+
+(def refresh-token "1/DGLSKAIlChe1jPJB1dCGpE2BhX-a_EOr850Vhx3jnxg")
+(apply client/refresh-access-token ((juxt :authorize-uri :client-id :client-secret ) (-> system :webapp-oauth-client) ))
+
+```
+
 ## Development
 
 For rapid development, use the REPL from the command line or via your

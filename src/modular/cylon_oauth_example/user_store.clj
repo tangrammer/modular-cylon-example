@@ -3,7 +3,9 @@
               [cylon.user.protocols :refer (UserStore get-user)]
               [cylon.token-store.protocols :refer (TokenStore create-token! get-token-by-id renew-token! purge-token! dissoc-token! merge-token!)]
               [cylon.user.totp :as t :refer (OneTimePasswordStore set-totp-secret get-totp-secret)]
-              [plumbing.core :refer (<-)]))
+              [plumbing.core :refer (<-)])
+  (:import [com.google.appengine.api.datastore Entity DatastoreService DatastoreServiceFactory] )
+  )
 
 
 (defrecord MyUserStore [host port dbname user password token-store]

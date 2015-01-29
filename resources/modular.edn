@@ -13,9 +13,11 @@
                 :authorize-uri "https://github.com/login/oauth/authorize"
                 :access-token-uri "https://github.com/login/oauth/access_token"}
 
- :oauth-client {:scopes #{"https://www.googleapis.com/auth/calendar.readonly" "https://www.googleapis.com/auth/userinfo.profile"}
+ :oauth-client {:scopes #{"https://www.googleapis.com/auth/calendar.readonly" "https://www.googleapis.com/auth/userinfo.email"}
                   :id "817533269951-0490104ret2fvkjig8nq5l6jvh05k4gn.apps.googleusercontent.com"
                   :secret "UKH7s5uW2Is0hFJxdTMMEy4H"
                   :authorize-uri "https://accounts.google.com/o/oauth2/auth"
-                  :access-token-uri "https://accounts.google.com/o/oauth2/token"}
+                :access-token-uri "https://accounts.google.com/o/oauth2/token"}
+
+ :employees-allowed #{"juanantonioruz@gmail.com" "codigodelaimagen@gmail.com"}
  }

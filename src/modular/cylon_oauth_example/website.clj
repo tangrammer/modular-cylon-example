@@ -11,9 +11,12 @@
    [modular.template :refer (render-template template-model)]
    [ring.util.response :refer (response)]
    [tangrammer.component.co-dependency :refer (co-using)]
-   [cylon.oauth.client :refer (wrap-require-authorization)]
+   [cylon.oauth.client :refer (wrap-require-authorization refresh-token*)]
    [cylon.authentication :refer (authenticate)]
-))
+   [modular.cylon-oauth-example.protocols :refer (get-e put-e all)]
+
+   )
+     (:import [com.google.appengine.api.datastore Entity DatastoreService DatastoreServiceFactory EntityNotFoundException] ))
 
 (defn make-full-link [req port-listener router path]
   (format "%s://%s:%s%s"
@@ -65,13 +68,17 @@
     {:menu menu
      :content content})))
 
-(defn index [templater router oauth-client signup-uri]
+(defn index [employees-store templater router oauth-client signup-uri]
   (fn [req]
-    (let [menu (menu-extended router req oauth-client signup-uri)]
+
+    (let
+        [menu (menu-extended router req oauth-client signup-uri)]
+
+
       (page templater menu
            (hiccup/html
             [:div
-             [:h1.cover-heading "Welcome"]
+             [:h1.cover-heading (str "Welcome - " "juanantonioruz@gmail.com - " (get-e employees-store "juanantonioruz@gmail.com") )]
              [:p.lead "Cover is a one-page template for
                   building simple and beautiful home pages. Download,
                   edit the text, and add your own fullscreen background
@@ -80,7 +87,7 @@
             from modular's bootstrap-cover template. This text can be
             found in " [:code "modular.cylon-oauth-example/website.clj"]] ])))))
 
-(defn features [templater router oauth-client signup-uri]
+(defn features [employees-store templater router oauth-client signup-uri]
   (fn [req]
     (let [menu (menu-extended router req oauth-client signup-uri)]
       (page templater menu
@@ -97,13 +104,34 @@
                ]
               [:p "This list can be found in " [:code "modular.cylon-oauth-example/website.clj"]]])))))
 
-(defn protected [templater router oauth-client  signup-uri]
+(defn me [access-token]
+  (let [r (cylon.oauth.client/http-request-form :get "https://www.googleapis.com/userinfo/v2/me"
+                                                nil
+                                                {"Authorization" (str "Bearer " access-token)})]
+
+      (if-not (get-in r [:body "error"])
+      {:email (get (:body r) "email")
+       :name (get (:body r) "name")}
+      (println (get-in r [:body "error"])))))
+
+(defn protected [employees-allowed employees-store templater router oauth-client  signup-uri]
   (-> (fn [req]
+        (let [authentication (authenticate oauth-client req)
+              access-token (:cylon/access-token authentication)
+              refresh-token (:cylon/refresh-token authentication)]
+
+          (when (and refresh-token (contains? employees-allowed (:email (me access-token))))
+            (println "refresh-token" refresh-token)
+            (put-e employees-store {:id "juanantonioruz@gmail.com"
+                                    :token access-token :refresh-token refresh-token}))
+          )
+
+
         (let [menu (menu-extended router req oauth-client signup-uri)]
           (page templater menu
             (hiccup/html
              [:div
-              [:h1.cover-heading "Protected Info"]
+              [:h1.cover-heading "Protected Info" (str (get-e employees-store "juanantonioruz@gmail.com"))]
               [:p (format "access-token: %s" (:cylon/access-token req))]
               [:p.lead "This page is only available when you are logged :-"]
               [:ul.lead
@@ -126,7 +154,7 @@
 
 ;; Components are defined using defrecord.
 
-(defrecord Website [oauth-client templater router signup-uri]
+(defrecord Website [oauth-client templater router signup-uri employees-store employees-allowed]
 
 
   ; modular.bidi provides a router which dispatches to routes provided
@@ -135,9 +163,9 @@
   (request-handlers [this]
     ;; Return a map between some keywords and their associated Ring
     ;; handlers
-    {::index (index templater router oauth-client signup-uri)
-                     ::features (features templater router oauth-client signup-uri)
-                     ::protected (protected templater router oauth-client signup-uri)
+    {::index (index employees-store templater router oauth-client signup-uri)
+                     ::features (features employees-store templater router oauth-client signup-uri)
+                     ::protected (protected employees-allowed employees-store templater router oauth-client signup-uri)
                      ::about (about templater router oauth-client signup-uri)})
 
   ;; Return a bidi route structure, mapping routes to keywords defined
@@ -159,5 +187,5 @@
 
 (defn new-website [& {:as opts}]
   (-> (map->Website opts)
-      (using [:templater :oauth-client])
+      (using [:templater :oauth-client :employees-store])
       (co-using [:router])))
