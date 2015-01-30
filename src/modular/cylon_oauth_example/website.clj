@@ -13,7 +13,8 @@
    [tangrammer.component.co-dependency :refer (co-using)]
    [cylon.oauth.client :refer (wrap-require-authorization refresh-token*)]
    [cylon.authentication :refer (authenticate)]
-   [modular.cylon-oauth-example.protocols :refer (get-e put-e all)]
+
+   [modular.cylon-oauth-example.protocols :refer (EmployeeStore get-e put-e all)]
 
    )
      (:import [com.google.appengine.api.datastore Entity DatastoreService DatastoreServiceFactory EntityNotFoundException] ))
@@ -138,6 +139,34 @@
                [:li "your personal info ..."]
                [:li "your personal info ..."]]]))))
       (wrap-require-authorization oauth-client  "https://www.googleapis.com/auth/calendar.readonly")))
+;; *calendar_home* call!
+;; checks if has identity
+;; checks if has priviledges to show me calendar and email
+;; checks if email exists in allowed-employees
+;; if first time: ....
+;;              stores the refresh-token (with email )
+;;              show calendar names to select one
+;;              redirect_to *select_calendar*
+
+;; else
+;;    store :weapp-session loaded_access_tokens_employees
+;;    show:...
+;;       employees (activated) table:  (those who have refres-token so we can access their identity and calendar events)
+;;       search form: with calendar component input and morning/afternoon select input
+;;                    action *search_employees*
+;;
+
+;; *select_calendar* call!
+;; show select with all calendars
+
+;; on-select >
+;;            stores the calendar name (with email and refresh-token)
+;;            redirect_to *calendar_home*
+
+
+;; *search_employees* call!
+;; show: search_results (perhaps and search_form)
+;;
 
 (defn about [templater router oauth-client signup-uri]
   (fn [req]
@@ -164,9 +193,9 @@
     ;; Return a map between some keywords and their associated Ring
     ;; handlers
     {::index (index employees-store templater router oauth-client signup-uri)
-                     ::features (features employees-store templater router oauth-client signup-uri)
-                     ::protected (protected employees-allowed employees-store templater router oauth-client signup-uri)
-                     ::about (about templater router oauth-client signup-uri)})
+     ::features (features employees-store templater router oauth-client signup-uri)
+     ::protected (protected employees-allowed employees-store templater router oauth-client signup-uri)
+     ::about (about templater router oauth-client signup-uri)})
 
   ;; Return a bidi route structure, mapping routes to keywords defined
   ;; above. This additional level of indirection means we can generate
