@@ -95,7 +95,7 @@
   (assoc system
     :bootstrap-cover-website-website
     (->
-     (make new-website config :signup-uri (str (get-in config [:auth-server :location]) "/auth/signup")
+     (make new-website config
            :employees-allowed (:employees-allowed config))
      (using {:oauth-client :webapp-oauth-client
              :employees-store :employees-store})
@@ -166,8 +166,7 @@
          :access-token-uri (get-in config [:oauth-client :access-token-uri])
 ;         (str (get-in config [:auth-server :location]) "/auth/access-token")
 
-         :end-session-endpoint
-         (str (get-in config [:auth-server :location]) "/auth/logout")
+
 
          ;; Specify this client is special doesn't require the user to
          ;; authorize the application. This should only be false for
@@ -213,7 +212,8 @@
                                    :jquery :jquery-resources
                                    :oauth-client :webapp-oauth-client
                                    },
-   :bootstrap-cover-website-website {:templater :clostache-templater-templater}})
+   :bootstrap-cover-website-website {:templater :clostache-templater-templater
+                                     :session-store :webapp-session-store}})
 
 (defn new-co-dependency-map
   []

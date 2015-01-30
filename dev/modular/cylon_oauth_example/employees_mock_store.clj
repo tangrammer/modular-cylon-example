@@ -1,10 +1,14 @@
 (ns modular.cylon-oauth-example.employees-mock-store
   (:require   [com.stuartsierra.component :as component :refer (using)]
               [plumbing.core :refer (<-)]
-              [modular.cylon-oauth-example.protocols :refer (EmployeeStore get-e put-e all)])
+              [modular.cylon-oauth-example.protocols :refer (EmployeeStore get-e put-e update-e all)])
   (:import [com.google.appengine.api.datastore Entity DatastoreService DatastoreServiceFactory Key EntityNotFoundException Query]
            [com.google.appengine.tools.development.testing LocalDatastoreServiceTestConfig LocalServiceTestHelper LocalServiceTestConfig])
   )
+
+(defn update-prop [e k m]
+  (when (k m)
+        (.setProperty e (name k) (k m))))
 
 (defn helper []
   (LocalServiceTestHelper. (into-array LocalServiceTestConfig [(LocalDatastoreServiceTestConfig.)])))
@@ -16,7 +20,7 @@
   {:token (.getProperty employee "token")
    :refresh-token (.getProperty employee "refresh-token")
    :id (.getName (.getKey employee))
-   :calendar "TODO:"
+   :calendar (.getProperty employee "calendar")
    :class "Employee"})
 
 (defrecord GoogleEmployeeStoreMock []
@@ -44,14 +48,15 @@
       )
     (let [^DatastoreService datastore (datastore)
           ^Entity e (Entity. "Employee" (:id options))]
-      (.setProperty e "token" (:token options))
-      (.setProperty e "refresh-token" (:refresh-token options))
+      (doall (map #(update-prop e % options) [:token :refresh-token :calendar]))
+
       (.put datastore e)
       (println "inserted  done!!" e)
       (format-e e)
       )
 
     )
+
 
 
   (get-e [this id]
@@ -74,6 +79,10 @@
 
       )
 
+    )
+
+  (update-e  [this id options]
+    (put-e this (merge (get-e this id) options))
     )
 
   (all [this]
@@ -99,3 +108,11 @@
       (all store)
       )
     )
+
+
+(do (.setUp (helper))
+    (let [store (new-employees-store)]
+      (put-e store {:id "juan-"  :token "a" :refresh-token "b"})
+      (update-e store "juan-" {:calendar 1} )
+      (get-e store "juan-")
+      ))
