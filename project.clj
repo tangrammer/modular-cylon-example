@@ -26,8 +26,8 @@
    [org.slf4j/log4j-over-slf4j "1.7.2"]
    [org.webjars/bootstrap "3.3.0"]
    [org.webjars/jquery "2.1.0"]
-   [prismatic/plumbing "0.2.2"]
-   [prismatic/schema "0.3.3"]
+   [prismatic/plumbing "0.4.3"]
+   [prismatic/schema "0.4.0"]
    [ch.qos.logback/logback-classic "1.0.7" :exclusions [org.slf4j/slf4j-api]]
 
    [cylon "0.5.0-20150120.154532-33"]
@@ -47,8 +47,5 @@
   :repl-options {:init-ns user
                  :welcome (println "Type (dev) to start")}
 
-  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]
-
-
-                                  ]
+  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]]
                    :source-paths ["dev"]}})

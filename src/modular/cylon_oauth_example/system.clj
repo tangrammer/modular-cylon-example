@@ -32,7 +32,7 @@
 
    [modular.bidi :refer (new-router new-static-resource-service new-web-service)]
    [modular.clostache :refer (new-clostache-templater)]
-   [modular.http-kit :refer (new-webserver)]
+   [modular.cylon-oauth-example.http-kit :refer (new-webserver)]
    ))
 
 

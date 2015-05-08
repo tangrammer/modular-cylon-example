@@ -12,7 +12,9 @@
    [bidi.bidi :refer (match-route path-for)]
    [modular.wire-up :refer (normalize-dependency-map)]
 
-
+   [org.httpkit.server :refer (run-server)]
+   [plumbing.core :refer (fnk)]
+   [plumbing.graph :as graph]
    ))
 
 
@@ -87,3 +89,10 @@
     (insert-user "tangrammer" "clojure" "Juan" "juanantonioruz@gmail.com")
     (pprint (-> system :user-store))
     :reset+data-ok))
+
+
+
+(def lg
+  (graph/lazy-compile
+   {:http-listener (fnk [system] (println "get value :http-listener-listener from system") (-> system :http-listener-listener))
+    :server (fnk [http-listener] (println "call run-server!") (run-server (-> http-listener :h) {:port 8010}))}))
